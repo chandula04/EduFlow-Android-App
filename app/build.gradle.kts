@@ -1,11 +1,16 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.google.gms.google-services") version "4.4.1" apply false
 }
 
 android {
     namespace = "com.cmw.eduflow"
     compileSdk = 36
+
+    buildFeatures {
+        viewBinding = true // Enable ViewBinding
+    }
 
     defaultConfig {
         applicationId = "com.cmw.eduflow"
@@ -45,4 +50,16 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Navigation Component (for Fragments and navigation)
+    implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
+
+    // Firebase (Authentication, Firestore Database)
+    implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+
+    // QR Code Scanner (ZXing - Zebra Crossing)
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 }
