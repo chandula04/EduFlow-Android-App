@@ -5,7 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?colorSurface"
+    android:background="@drawable/background_aurora_animated"
+    android:fitsSystemWindows="true"
     tools:context=".LoginFragment">
 
     <TextView
@@ -14,7 +15,11 @@
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-condensed-light"
         android:text="EduFlow"
-        android:textColor="?colorPrimary"
+        android:textColor="@color/white"
+        android:shadowColor="#80000000"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="4"
         android:textSize="48sp"
         app:layout_constraintBottom_toTopOf="@+id/cardView"
         app:layout_constraintEnd_toEndOf="parent"
@@ -28,7 +33,10 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
-        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="#2AFFFFFF"
+        app:strokeColor="#55FFFFFF"
+        app:strokeWidth="1dp"
+        app:cardCornerRadius="20dp"
         app:cardElevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -45,12 +53,16 @@
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:boxStrokeColor="@color/white"
+                app:hintTextColor="@color/white"
+                android:textColorHint="@color/white"
                 android:hint="Email">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/white"
                     android:inputType="textEmailAddress" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -60,12 +72,17 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 app:passwordToggleEnabled="true"
+                app:passwordToggleTint="@color/white"
+                app:boxStrokeColor="@color/white"
+                app:hintTextColor="@color/white"
+                android:textColorHint="@color/white"
                 android:hint="Password">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/white"
                     android:inputType="textPassword" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -80,6 +97,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
+                    android:textColor="@color/white"
+                    app:buttonTint="@color/white"
                     android:text="Remember Me" />
 
                 <TextView
@@ -90,7 +109,7 @@
                     android:layout_centerVertical="true"
                     android:padding="8dp"
                     android:text="Forgot Password?"
-                    android:textColor="?attr/colorPrimary"
+                    android:textColor="@color/white"
                     android:clickable="true"
                     android:focusable="true" />
             </RelativeLayout>
@@ -105,6 +124,8 @@
         android:layout_marginTop="24dp"
         android:padding="12dp"
         android:text="Login"
+        android:backgroundTint="#CCFFFFFF"
+        android:textColor="#3A6073"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="@+id/cardView"
         app:layout_constraintStart_toStartOf="@+id/cardView"
@@ -117,7 +138,7 @@
         android:layout_marginTop="16dp"
         android:text="Don't have an account? Register"
         android:padding="8dp"
-        android:textColor="?attr/colorPrimary"
+        android:textColor="@color/white"
         android:clickable="true"
         android:focusable="true"
         app:layout_constraintEnd_toEndOf="@+id/btnLogin"

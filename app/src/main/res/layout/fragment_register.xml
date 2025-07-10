@@ -5,6 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background_aurora_animated"
+    android:fitsSystemWindows="true"
     tools:context=".RegisterFragment">
 
     <TextView
@@ -14,7 +16,7 @@
         android:layout_marginTop="64dp"
         android:text="Create Account"
         android:textSize="32sp"
-        android:textColor="?colorPrimary"
+        android:textColor="@color/white"
         android:fontFamily="sans-serif-light"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -29,12 +31,13 @@
         android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
         android:hint="Full Name"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvRegisterTitle">
+        app:boxStrokeColor="@color/white"
+        app:hintTextColor="@color/white"
+        android:textColorHint="@color/white">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etName"
+            android:textColor="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -46,6 +49,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:hint="Email"
+        app:boxStrokeColor="@color/white"
+        app:hintTextColor="@color/white"
+        android:textColorHint="@color/white"
         app:layout_constraintEnd_toEndOf="@+id/layoutName"
         app:layout_constraintStart_toStartOf="@+id/layoutName"
         app:layout_constraintTop_toBottomOf="@+id/layoutName">
@@ -53,6 +59,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etEmail"
             android:inputType="textEmailAddress"
+            android:textColor="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -64,7 +71,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         app:passwordToggleEnabled="true"
+        app:passwordToggleTint="@color/white"
         android:hint="Password"
+        app:boxStrokeColor="@color/white"
+        app:hintTextColor="@color/white"
+        android:textColorHint="@color/white"
         app:layout_constraintEnd_toEndOf="@+id/layoutEmail"
         app:layout_constraintStart_toStartOf="@+id/layoutEmail"
         app:layout_constraintTop_toBottomOf="@+id/layoutEmail">
@@ -72,6 +83,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etPassword"
             android:inputType="textPassword"
+            android:textColor="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -82,6 +94,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:background="@drawable/abc_spinner_textfield_background_material"
+        android:popupBackground="#3A6073"
         android:padding="16dp"
         app:layout_constraintEnd_toEndOf="@+id/layoutPassword"
         app:layout_constraintStart_toStartOf="@+id/layoutPassword"
@@ -93,6 +106,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="Register"
+        android:backgroundTint="#CCFFFFFF"
+        android:textColor="#3A6073"
         android:padding="12dp"
         app:layout_constraintEnd_toEndOf="@+id/spinnerRole"
         app:layout_constraintStart_toStartOf="@+id/spinnerRole"

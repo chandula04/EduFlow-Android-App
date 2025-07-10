@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.graphics.drawable.AnimationDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -45,6 +46,13 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Start background animation
+        val animDrawable = view.background as AnimationDrawable
+        animDrawable.setEnterFadeDuration(10)
+        animDrawable.setExitFadeDuration(5000)
+        animDrawable.start()
+
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
         storage = FirebaseStorage.getInstance()
@@ -69,7 +77,7 @@ class ProfileFragment : Fragment() {
                     }
                     val photoUrl = document.getString("profilePictureUrl")
                     if (!photoUrl.isNullOrEmpty()) {
-                        Glide.with(this).load(photoUrl).into(binding.ivProfile)
+                        Glide.with(this).load(photoUrl).circleCrop().into(binding.ivProfile)
                     }
                 }
             }

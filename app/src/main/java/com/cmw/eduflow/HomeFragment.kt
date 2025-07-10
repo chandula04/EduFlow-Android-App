@@ -1,9 +1,11 @@
 package com.cmw.eduflow
 
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.cmw.eduflow.databinding.FragmentHomeBinding
@@ -26,7 +28,6 @@ class HomeFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
-        // Check for existing user session as soon as the view is created
         checkUserSession()
 
         return binding.root
@@ -35,7 +36,17 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Set up the click listener for users who are not logged in
+        // Start background animation
+        val animDrawable = binding.mainContainer.background as AnimationDrawable
+        animDrawable.setEnterFadeDuration(10)
+        animDrawable.setExitFadeDuration(5000)
+        animDrawable.start()
+
+        // Start button pulse animation
+        val pulseAnimation = AnimationUtils.loadAnimation(context, R.anim.anim_glow_pulse)
+        binding.btnGetStarted.startAnimation(pulseAnimation)
+
+
         binding.btnGetStarted.setOnClickListener {
             findNavController().navigate(R.id.action_homeFragment_to_loginFragment)
         }
@@ -47,9 +58,6 @@ class HomeFragment : Fragment() {
             if (userId != null) {
                 db.collection("users").document(userId).get()
                     .addOnSuccessListener { document ->
-                        // ✅ THIS IS THE FIX:
-                        // Only navigate if the current screen is still the HomeFragment.
-                        // This prevents a crash if the user navigates away before this check completes.
                         if (findNavController().currentDestination?.id == R.id.homeFragment) {
                             if (document != null && document.exists()) {
                                 val role = document.getString("role")
@@ -57,7 +65,7 @@ class HomeFragment : Fragment() {
                                     "admin" -> R.id.action_homeFragment_to_adminDashboardFragment
                                     "teacher" -> R.id.action_homeFragment_to_teacherDashboardFragment
                                     "student" -> R.id.action_homeFragment_to_studentDashboardFragment
-                                    else -> null // Do nothing if role is unknown
+                                    else -> null
                                 }
                                 action?.let {
                                     findNavController().navigate(it)
@@ -67,8 +75,8 @@ class HomeFragment : Fragment() {
                     }
             }
         }
-        // If auth.currentUser is null, do nothing. The user will stay on the home screen.
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface"
+    android:background="@drawable/background_aurora_animated"
+    android:fitsSystemWindows="true"
     tools:context=".ProfileFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -17,13 +18,16 @@
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:layout_marginTop="32dp"
-            android:background="@color/material_dynamic_primary40"
+            android:background="@color/white"
+            android:padding="4dp"
             android:scaleType="centerCrop"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
-            app:srcCompat="@drawable/ic_launcher_foreground" />
+            app:strokeColor="#CCFFFFFF"
+            app:strokeWidth="2dp"
+            tools:srcCompat="@drawable/ic_profile_user" />
 
         <TextView
             android:id="@+id/tvChangePhoto"
@@ -31,7 +35,7 @@
             android:layout_height="wrap_content"
             android:padding="8dp"
             android:text="Change Photo"
-            android:textColor="?colorPrimary"
+            android:textColor="@color/white"
             app:layout_constraintEnd_toEndOf="@+id/ivProfile"
             app:layout_constraintStart_toStartOf="@+id/ivProfile"
             app:layout_constraintTop_toBottomOf="@+id/ivProfile" />
@@ -42,13 +46,17 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:hint="Full Name"
+            app:boxStrokeColor="@color/white"
+            app:hintTextColor="@color/white"
+            android:textColorHint="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvChangePhoto">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etName"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textColor="@color/white" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -57,6 +65,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:hint="Birthdate (YYYY-MM-DD)"
+            app:boxStrokeColor="@color/white"
+            app:hintTextColor="@color/white"
+            android:textColorHint="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layoutName">
@@ -64,6 +75,7 @@
                 android:id="@+id/etBirthdate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/white"
                 android:focusable="false" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -73,6 +85,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="Gender"
+            android:textColor="@color/white"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/layoutBirthdate" />
@@ -84,9 +97,9 @@
             android:orientation="horizontal"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvGenderLabel">
-            <RadioButton android:id="@+id/rbMale" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Male" />
-            <RadioButton android:id="@+id/rbFemale" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Female" />
-            <RadioButton android:id="@+id/rbOther" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Other" />
+            <RadioButton android:id="@+id/rbMale" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/white" app:buttonTint="@color/white" android:text="Male" />
+            <RadioButton android:id="@+id/rbFemale" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/white" app:buttonTint="@color/white" android:text="Female" />
+            <RadioButton android:id="@+id/rbOther" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/white" app:buttonTint="@color/white" android:text="Other" />
         </RadioGroup>
 
         <Button
@@ -95,6 +108,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:text="Update Profile"
+            android:backgroundTint="#CCFFFFFF"
+            android:textColor="#3A6073"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/rgGender" />
@@ -106,7 +121,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="Delete Account"
-            android:textColor="@android:color/holo_red_light"
+            android:textColor="#FF8A80"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/btnUpdateProfile" />

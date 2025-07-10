@@ -1,15 +1,17 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Base.Theme.EduFlow" parent="Theme.Material3.Dark.NoActionBar">
+    <style name="Base.Theme.EduFlow" parent="Theme.Material3.DayNight.NoActionBar">
     </style>
+
+    <style name="Theme.EduFlow" parent="Base.Theme.EduFlow" />
 
     <style name="GlassCard" parent="Widget.Material3.CardView.Filled">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">120dp</item>
         <item name="android:layout_marginBottom">24dp</item>
-        <item name="cardElevation">0dp</item>
-        <item name="cardCornerRadius">20dp</item>
+        <item name="cardElevation">4dp</item>
+        <item name="cardCornerRadius">28dp</item>
         <item name="cardBackgroundColor">@android:color/transparent</item>
-        <item name="android:background">@drawable/card_glass_background</item>
+        <item name="android:background">@drawable/card_border_modern</item>
         <item name="android:foreground">@drawable/card_glow_effect</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>

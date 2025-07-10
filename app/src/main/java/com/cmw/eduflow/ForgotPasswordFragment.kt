@@ -1,5 +1,6 @@
 package com.cmw.eduflow
 
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -28,6 +29,13 @@ class ForgotPasswordFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Start background animation
+        val animDrawable = view.background as AnimationDrawable
+        animDrawable.setEnterFadeDuration(10)
+        animDrawable.setExitFadeDuration(5000)
+        animDrawable.start()
+
         auth = FirebaseAuth.getInstance()
 
         binding.btnSendResetLink.setOnClickListener {
@@ -39,7 +47,7 @@ class ForgotPasswordFragment : Fragment() {
                         setLoading(false)
                         if (task.isSuccessful) {
                             Toast.makeText(context, "Password reset link sent to your email.", Toast.LENGTH_LONG).show()
-                            findNavController().popBackStack() // Go back to login screen
+                            findNavController().popBackStack()
                         } else {
                             Toast.makeText(context, "Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                         }

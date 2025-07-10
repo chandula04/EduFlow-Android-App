@@ -1,6 +1,6 @@
-// com/cmw/eduflow/RegisterFragment.kt
 package com.cmw.eduflow
 
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -33,6 +33,12 @@ class RegisterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Start background animation
+        val animDrawable = view.background as AnimationDrawable
+        animDrawable.setEnterFadeDuration(10)
+        animDrawable.setExitFadeDuration(5000)
+        animDrawable.start()
+
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
@@ -44,8 +50,6 @@ class RegisterFragment : Fragment() {
     }
 
     private fun setupSpinner() {
-        // For security, only allow Student and Teacher registration from the app.
-        // Admins should be created manually via the Firebase Console.
         val roles = listOf("Student", "Teacher")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, roles)
         binding.spinnerRole.adapter = adapter
@@ -73,12 +77,10 @@ class RegisterFragment : Fragment() {
                     email = email,
                     role = role
                 )
-                // Save user details to Firestore
                 db.collection("users").document(firebaseUser.uid).set(user)
                     .addOnSuccessListener {
                         setLoading(false)
                         Toast.makeText(context, "Registration successful!", Toast.LENGTH_SHORT).show()
-                        // Navigate to login screen after successful registration
                         findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
                     }
                     .addOnFailureListener { e ->
