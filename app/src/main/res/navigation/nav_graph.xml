@@ -13,6 +13,21 @@
         <action
             android:id="@+id/action_homeFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_adminDashboardFragment"
+            app:destination="@id/adminDashboardFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_homeFragment_to_teacherDashboardFragment"
+            app:destination="@id/teacherDashboardFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_homeFragment_to_studentDashboardFragment"
+            app:destination="@id/studentDashboardFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true"/>
     </fragment>
 
     <fragment
@@ -23,21 +38,24 @@
         <action
             android:id="@+id/action_loginFragment_to_adminDashboardFragment"
             app:destination="@id/adminDashboardFragment"
-            app:popUpTo="@id/nav_graph"
+            app:popUpTo="@id/homeFragment"
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_loginFragment_to_teacherDashboardFragment"
             app:destination="@id/teacherDashboardFragment"
-            app:popUpTo="@id/nav_graph"
+            app:popUpTo="@id/homeFragment"
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_loginFragment_to_studentDashboardFragment"
             app:destination="@id/studentDashboardFragment"
-            app:popUpTo="@id/nav_graph"
+            app:popUpTo="@id/homeFragment"
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_loginFragment_to_registerFragment"
             app:destination="@id/registerFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_forgotPasswordFragment"
+            app:destination="@id/forgotPasswordFragment" />
     </fragment>
 
     <fragment
@@ -53,15 +71,23 @@
     </fragment>
 
     <fragment
+        android:id="@+id/forgotPasswordFragment"
+        android:name="com.cmw.eduflow.ForgotPasswordFragment"
+        android:label="fragment_forgot_password"
+        tools:layout="@layout/fragment_forgot_password" />
+
+    <fragment
         android:id="@+id/adminDashboardFragment"
         android:name="com.cmw.eduflow.AdminDashboardFragment"
         android:label="Admin Dashboard"
         tools:layout="@layout/fragment_admin_dashboard" />
+
     <fragment
         android:id="@+id/teacherDashboardFragment"
         android:name="com.cmw.eduflow.TeacherDashboardFragment"
         android:label="Teacher Dashboard"
         tools:layout="@layout/fragment_teacher_dashboard" />
+
     <fragment
         android:id="@+id/studentDashboardFragment"
         android:name="com.cmw.eduflow.StudentDashboardFragment"
