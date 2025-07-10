@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "798562408067",
+    "project_id": "edu-flow-app",
+    "storage_bucket": "edu-flow-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:798562408067:android:83d829a12e02f0c3ecedb6",
+        "android_client_info": {
+          "package_name": "com.cmw.eduflow"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBoilgrLC2yy4ZJimELte7UFe4oLLj2CB0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
