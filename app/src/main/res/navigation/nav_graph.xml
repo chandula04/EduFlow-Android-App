@@ -1,6 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/nav_graph">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loginFragment">
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.cmw.eduflow.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_loginFragment_to_adminDashboardFragment"
+            app:destination="@id/adminDashboardFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_teacherDashboardFragment"
+            app:destination="@id/teacherDashboardFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_studentDashboardFragment"
+            app:destination="@id/studentDashboardFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminDashboardFragment"
+        android:name="com.cmw.eduflow.AdminDashboardFragment"
+        android:label="Admin Dashboard"
+        tools:layout="@layout/fragment_admin_dashboard" />
+
+    <fragment
+        android:id="@+id/teacherDashboardFragment"
+        android:name="com.cmw.eduflow.TeacherDashboardFragment"
+        android:label="Teacher Dashboard"
+        tools:layout="@layout/fragment_teacher_dashboard" />
+
+    <fragment
+        android:id="@+id/studentDashboardFragment"
+        android:name="com.cmw.eduflow.StudentDashboardFragment"
+        android:label="Student Dashboard"
+        tools:layout="@layout/fragment_student_dashboard" />
 
 </navigation>
