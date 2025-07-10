@@ -5,6 +5,10 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/homeFragment">
 
+    <action
+        android:id="@+id/action_global_profileFragment"
+        app:destination="@id/profileFragment" />
+
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.cmw.eduflow.HomeFragment"
@@ -75,6 +79,12 @@
         android:name="com.cmw.eduflow.ForgotPasswordFragment"
         android:label="fragment_forgot_password"
         tools:layout="@layout/fragment_forgot_password" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.cmw.eduflow.ProfileFragment"
+        android:label="Edit Profile"
+        tools:layout="@layout/fragment_profile" />
 
     <fragment
         android:id="@+id/adminDashboardFragment"

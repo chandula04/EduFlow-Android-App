@@ -1,5 +1,6 @@
 package com.cmw.eduflow
 
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -30,6 +31,12 @@ class TeacherDashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Start the animated background
+        val animDrawable = binding.mainContainer.background as AnimationDrawable
+        animDrawable.setEnterFadeDuration(10)
+        animDrawable.setExitFadeDuration(5000)
+        animDrawable.start()
+
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
@@ -51,12 +58,15 @@ class TeacherDashboardFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        // Handle Logout
+        // Handle Toolbar Menu item clicks (Profile and Logout)
         binding.toolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
+                R.id.action_profile -> {
+                    findNavController().navigate(R.id.action_global_profileFragment)
+                    true
+                }
                 R.id.action_logout -> {
                     auth.signOut()
-                    // Navigate to home and clear back stack
                     findNavController().navigate(R.id.homeFragment)
                     true
                 }
@@ -64,19 +74,16 @@ class TeacherDashboardFragment : Fragment() {
             }
         }
 
-        // --- Placeholder Click Listeners for Features ---
+        // Placeholder Click Listeners for Feature Cards
         binding.cardScanAttendance.setOnClickListener {
-            // TODO: Navigate to QR Scanner Fragment
             Toast.makeText(context, "QR Scanner feature coming soon!", Toast.LENGTH_SHORT).show()
         }
 
         binding.cardManageAssignments.setOnClickListener {
-            // TODO: Navigate to Assignments Fragment
             Toast.makeText(context, "Assignment feature coming soon!", Toast.LENGTH_SHORT).show()
         }
 
         binding.cardUploadMaterials.setOnClickListener {
-            // TODO: Navigate to Materials Fragment
             Toast.makeText(context, "Materials feature coming soon!", Toast.LENGTH_SHORT).show()
         }
     }

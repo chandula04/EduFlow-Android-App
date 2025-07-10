@@ -2,6 +2,7 @@ package com.cmw.eduflow
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +22,6 @@ class LoginFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
 
-    // Define SharedPreferences constants
     private val PREFS_NAME = "EduFlowPrefs"
     private val KEY_EMAIL = "email"
     private val KEY_PASSWORD = "password"
@@ -41,7 +41,7 @@ class LoginFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
-        loadCredentials() // Load saved credentials if they exist
+        loadCredentials()
 
         binding.btnLogin.setOnClickListener {
             handleLogin()
@@ -51,13 +51,10 @@ class LoginFragment : Fragment() {
             findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
         }
 
-        // ✅ ADD THIS
         binding.tvForgotPassword.setOnClickListener {
             findNavController().navigate(R.id.action_loginFragment_to_forgotPasswordFragment)
         }
     }
-
-    // --- New and Updated Functions ---
 
     private fun handleLogin() {
         val email = binding.etEmail.text.toString().trim()
@@ -66,7 +63,6 @@ class LoginFragment : Fragment() {
         if (email.isNotEmpty() && password.isNotEmpty()) {
             setLoading(true)
 
-            // ✅ HANDLE SAVING CREDENTIALS
             if (binding.cbRememberMe.isChecked) {
                 saveCredentials(email, password)
             } else {
@@ -76,6 +72,7 @@ class LoginFragment : Fragment() {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
+                        Log.d("LoginDebug", "Firebase Auth successful.") // DEBUG LOG
                         val userId = auth.currentUser?.uid
                         checkUserRoleAndNavigate(userId)
                     } else {
@@ -86,6 +83,51 @@ class LoginFragment : Fragment() {
         } else {
             Toast.makeText(context, "Please enter email and password", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun checkUserRoleAndNavigate(userId: String?) {
+        if (userId == null) {
+            setLoading(false)
+            Log.d("LoginDebug", "User ID is null. Cannot proceed.") // DEBUG LOG
+            return
+        }
+
+        Log.d("LoginDebug", "Checking Firestore for user: $userId") // DEBUG LOG
+        setLoading(true)
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                Log.d("LoginDebug", "Firestore call successful.") // DEBUG LOG
+                if (document != null && document.exists()) {
+                    Log.d("LoginDebug", "Document found.") // DEBUG LOG
+                    val role = document.getString("role")
+                    Log.d("LoginDebug", "User role from Firestore: $role") // DEBUG LOG
+
+                    val action = when (role) {
+                        "admin" -> R.id.action_loginFragment_to_adminDashboardFragment
+                        "teacher" -> R.id.action_loginFragment_to_teacherDashboardFragment
+                        "student" -> R.id.action_loginFragment_to_studentDashboardFragment
+                        else -> null
+                    }
+
+                    if (action != null) {
+                        Log.d("LoginDebug", "Navigating to the correct dashboard.") // DEBUG LOG
+                        findNavController().navigate(action)
+                    } else {
+                        setLoading(false)
+                        Log.d("LoginDebug", "Role is unknown or null. No navigation.") // DEBUG LOG
+                        Toast.makeText(context, "Unknown user role.", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    setLoading(false)
+                    Log.d("LoginDebug", "Document does not exist for this user.") // DEBUG LOG
+                    Toast.makeText(context, "User data not found. Please register again.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { exception ->
+                setLoading(false)
+                Log.e("LoginDebug", "Firestore call failed: ${exception.message}") // DEBUG LOG
+                Toast.makeText(context, "Failed to get user role: ${exception.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun saveCredentials(email: String, pass: String) {
@@ -112,14 +154,10 @@ class LoginFragment : Fragment() {
         prefs.edit().clear().apply()
     }
 
-    // --- Unchanged Functions ---
-
-    private fun checkUserRoleAndNavigate(userId: String?) {
-        // ... (this function remains the same)
-    }
-
     private fun setLoading(isLoading: Boolean) {
-        // ... (this function remains the same)
+        binding.progressBar.isVisible = isLoading
+        binding.btnLogin.isEnabled = !isLoading
+        binding.tvGoToRegister.isEnabled = !isLoading
     }
 
     override fun onDestroyView() {

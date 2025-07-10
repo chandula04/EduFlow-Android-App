@@ -1,0 +1,5 @@
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/gradient_aurora_1" android:duration="6000" />
+    <item android:drawable="@drawable/gradient_aurora_2" android:duration="6000" />
+    <item android:drawable="@drawable/gradient_aurora_3" android:duration="6000" />
+</animation-list>
