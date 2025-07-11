@@ -18,6 +18,10 @@
         android:textSize="32sp"
         android:textColor="@color/white"
         android:fontFamily="sans-serif-light"
+        android:shadowColor="#80000000"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -33,7 +37,10 @@
         android:hint="Full Name"
         app:boxStrokeColor="@color/white"
         app:hintTextColor="@color/white"
-        android:textColorHint="@color/white">
+        android:textColorHint="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvRegisterTitle">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etName"
@@ -94,6 +101,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:background="@drawable/abc_spinner_textfield_background_material"
+        android:backgroundTint="#80FFFFFF"
         android:popupBackground="#3A6073"
         android:padding="16dp"
         app:layout_constraintEnd_toEndOf="@+id/layoutPassword"
