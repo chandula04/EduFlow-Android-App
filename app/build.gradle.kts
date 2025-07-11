@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "com.cmw.eduflow"
-        minSdk = 35
+        minSdk = 29
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
