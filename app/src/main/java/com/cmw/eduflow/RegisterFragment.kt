@@ -1,5 +1,6 @@
 package com.cmw.eduflow
 
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -32,7 +33,11 @@ class RegisterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // The animation code that caused the crash has been removed from here.
+        // Start background animation
+        val animDrawable = binding.registerContainer.background as AnimationDrawable
+        animDrawable.setEnterFadeDuration(10)
+        animDrawable.setExitFadeDuration(5000)
+        animDrawable.start()
 
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
@@ -46,7 +51,8 @@ class RegisterFragment : Fragment() {
 
     private fun setupSpinner() {
         val roles = listOf("Student", "Teacher")
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, roles)
+        val adapter = ArrayAdapter(requireContext(), R.layout.simple_spinner_item_white, roles)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerRole.adapter = adapter
     }
 
@@ -68,32 +74,45 @@ class RegisterFragment : Fragment() {
             return
         }
 
+        // Strong password validation
+        if (password.length < 6) {
+            Toast.makeText(context, "Password must be at least 6 characters long.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         setLoading(true)
 
         auth.createUserWithEmailAndPassword(email, password)
             .addOnSuccessListener { authResult ->
                 val firebaseUser = authResult.user!!
 
-                val user = User(
-                    uid = firebaseUser.uid,
-                    name = name,
-                    email = email,
-                    role = role,
-                    phone = phone,
-                    gender = gender,
-                    school = school
-                )
+                // Send verification email
+                firebaseUser.sendEmailVerification().addOnSuccessListener {
+                    val user = User(
+                        uid = firebaseUser.uid,
+                        name = name,
+                        email = email,
+                        role = role,
+                        phone = phone,
+                        gender = gender,
+                        school = school
+                    )
 
-                db.collection("users").document(firebaseUser.uid).set(user)
-                    .addOnSuccessListener {
-                        setLoading(false)
-                        Toast.makeText(context, "Registration successful!", Toast.LENGTH_SHORT).show()
-                        findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
-                    }
-                    .addOnFailureListener { e ->
-                        setLoading(false)
-                        Toast.makeText(context, "Error saving user details: ${e.message}", Toast.LENGTH_LONG).show()
-                    }
+                    db.collection("users").document(firebaseUser.uid).set(user)
+                        .addOnSuccessListener {
+                            setLoading(false)
+                            Toast.makeText(context, "Registration successful! Please check your email to verify your account.", Toast.LENGTH_LONG).show()
+                            findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
+                        }
+                        .addOnFailureListener { e ->
+                            setLoading(false)
+                            Toast.makeText(context, "Error saving user details: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
+
+                }.addOnFailureListener { e ->
+                    setLoading(false)
+                    Toast.makeText(context, "Failed to send verification email: ${e.message}", Toast.LENGTH_LONG).show()
+                }
             }
             .addOnFailureListener { e ->
                 setLoading(false)

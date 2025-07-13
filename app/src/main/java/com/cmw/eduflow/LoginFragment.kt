@@ -39,7 +39,6 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ✅ Start the aurora background animation
         val animDrawable = binding.loginContainer.background as AnimationDrawable
         animDrawable.setEnterFadeDuration(10)
         animDrawable.setExitFadeDuration(5000)
@@ -79,8 +78,16 @@ class LoginFragment : Fragment() {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        val userId = auth.currentUser?.uid
-                        checkUserRoleAndNavigate(userId)
+                        val user = auth.currentUser
+                        // Check if email is verified
+                        if (user != null && user.isEmailVerified) {
+                            Log.d("LoginDebug", "Email is verified.")
+                            checkUserRoleAndNavigate(user.uid)
+                        } else {
+                            setLoading(false)
+                            Toast.makeText(context, "Please verify your email address before logging in.", Toast.LENGTH_LONG).show()
+                            auth.signOut() // Sign out to force re-login after verification
+                        }
                     } else {
                         setLoading(false)
                         Toast.makeText(context, "Authentication failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
@@ -121,11 +128,16 @@ class LoginFragment : Fragment() {
             return
         }
 
+        Log.d("LoginDebug", "Checking Firestore for user: $userId")
         setLoading(true)
         db.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
+                Log.d("LoginDebug", "Firestore call successful.")
                 if (document != null && document.exists()) {
+                    Log.d("LoginDebug", "Document found.")
                     val role = document.getString("role")
+                    Log.d("LoginDebug", "User role from Firestore: $role")
+
                     val action = when (role) {
                         "admin" -> R.id.action_loginFragment_to_adminDashboardFragment
                         "teacher" -> R.id.action_loginFragment_to_teacherDashboardFragment
@@ -134,18 +146,22 @@ class LoginFragment : Fragment() {
                     }
 
                     if (action != null) {
+                        Log.d("LoginDebug", "Navigating to the correct dashboard.")
                         findNavController().navigate(action)
                     } else {
                         setLoading(false)
+                        Log.d("LoginDebug", "Role is unknown or null. No navigation.")
                         Toast.makeText(context, "Unknown user role.", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     setLoading(false)
+                    Log.d("LoginDebug", "Document does not exist for this user.")
                     Toast.makeText(context, "User data not found. Please register again.", Toast.LENGTH_SHORT).show()
                 }
             }
             .addOnFailureListener { exception ->
                 setLoading(false)
+                Log.e("LoginDebug", "Firestore call failed: ${exception.message}")
                 Toast.makeText(context, "Failed to get user role: ${exception.message}", Toast.LENGTH_SHORT).show()
             }
     }
