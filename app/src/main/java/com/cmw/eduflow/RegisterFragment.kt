@@ -1,6 +1,5 @@
 package com.cmw.eduflow
 
-import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -33,11 +32,7 @@ class RegisterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Start background animation
-        val animDrawable = binding.registerContainer.background as AnimationDrawable
-        animDrawable.setEnterFadeDuration(10)
-        animDrawable.setExitFadeDuration(5000)
-        animDrawable.start()
+        // The animation code that caused the crash has been removed.
 
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
@@ -56,7 +51,6 @@ class RegisterFragment : Fragment() {
     }
 
     private fun handleRegistration() {
-        // Get data from all fields
         val name = binding.etName.text.toString().trim()
         val email = binding.etEmail.text.toString().trim()
         val password = binding.etPassword.text.toString().trim()
@@ -80,7 +74,6 @@ class RegisterFragment : Fragment() {
             .addOnSuccessListener { authResult ->
                 val firebaseUser = authResult.user!!
 
-                // Create User object with all the new data
                 val user = User(
                     uid = firebaseUser.uid,
                     name = name,
