@@ -33,7 +33,6 @@ class RegisterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Start background animation
         val animDrawable = binding.registerContainer.background as AnimationDrawable
         animDrawable.setEnterFadeDuration(10)
         animDrawable.setExitFadeDuration(5000)
@@ -62,6 +61,7 @@ class RegisterFragment : Fragment() {
         val password = binding.etPassword.text.toString().trim()
         val phone = binding.etPhone.text.toString().trim()
         val school = binding.etSchool.text.toString().trim()
+        val grade = binding.etGrade.text.toString().trim() // ✅ Get the grade
         val role = binding.spinnerRole.selectedItem.toString().lowercase()
         val gender = when (binding.rgGender.checkedRadioButtonId) {
             R.id.rbMale -> "Male"
@@ -69,12 +69,12 @@ class RegisterFragment : Fragment() {
             else -> ""
         }
 
-        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || phone.isEmpty() || school.isEmpty() || gender.isEmpty()) {
+        // ✅ Add grade to the validation check
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || phone.isEmpty() || school.isEmpty() || gender.isEmpty() || grade.isEmpty()) {
             Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Strong password validation
         if (password.length < 6) {
             Toast.makeText(context, "Password must be at least 6 characters long.", Toast.LENGTH_SHORT).show()
             return
@@ -86,8 +86,8 @@ class RegisterFragment : Fragment() {
             .addOnSuccessListener { authResult ->
                 val firebaseUser = authResult.user!!
 
-                // Send verification email
                 firebaseUser.sendEmailVerification().addOnSuccessListener {
+                    // ✅ Add grade to the user object
                     val user = User(
                         uid = firebaseUser.uid,
                         name = name,
@@ -95,7 +95,8 @@ class RegisterFragment : Fragment() {
                         role = role,
                         phone = phone,
                         gender = gender,
-                        school = school
+                        school = school,
+                        grade = grade
                     )
 
                     db.collection("users").document(firebaseUser.uid).set(user)
@@ -108,7 +109,6 @@ class RegisterFragment : Fragment() {
                             setLoading(false)
                             Toast.makeText(context, "Error saving user details: ${e.message}", Toast.LENGTH_LONG).show()
                         }
-
                 }.addOnFailureListener { e ->
                     setLoading(false)
                     Toast.makeText(context, "Failed to send verification email: ${e.message}", Toast.LENGTH_LONG).show()
