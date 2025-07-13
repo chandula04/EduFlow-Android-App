@@ -1,12 +1,18 @@
 package com.cmw.eduflow
 
+import android.app.AlertDialog
+import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
+import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -21,6 +27,7 @@ class RegisterFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
+    private var isPasswordStrong = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,9 +49,58 @@ class RegisterFragment : Fragment() {
         db = FirebaseFirestore.getInstance()
 
         setupSpinner()
+        setupPasswordStrengthChecker()
 
         binding.btnRegister.setOnClickListener {
             handleRegistration()
+        }
+    }
+
+    private fun setupPasswordStrengthChecker() {
+        binding.etPassword.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                updatePasswordStrength(s.toString())
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+    }
+
+    private fun updatePasswordStrength(password: String) {
+        var strengthScore = 0
+        if (password.length >= 8) strengthScore++
+        if (password.any { it.isDigit() }) strengthScore++
+        if (password.any { it.isUpperCase() }) strengthScore++
+        if (password.any { !it.isLetterOrDigit() }) strengthScore++
+
+        val progressDrawable = binding.progressPassword.progressDrawable as LayerDrawable
+        val progressClip = progressDrawable.findDrawableByLayerId(android.R.id.progress)
+
+        when (strengthScore) {
+            0, 1 -> {
+                binding.tvPasswordStrength.text = "Weak"
+                binding.progressPassword.progress = 25
+                progressClip.setTint(Color.RED)
+                isPasswordStrong = false
+            }
+            2 -> {
+                binding.tvPasswordStrength.text = "Medium"
+                binding.progressPassword.progress = 50
+                progressClip.setTint(Color.YELLOW)
+                isPasswordStrong = false
+            }
+            3 -> {
+                binding.tvPasswordStrength.text = "Good"
+                binding.progressPassword.progress = 75
+                progressClip.setTint(ContextCompat.getColor(requireContext(), android.R.color.holo_orange_light))
+                isPasswordStrong = false
+            }
+            4 -> {
+                binding.tvPasswordStrength.text = "Strong"
+                binding.progressPassword.progress = 100
+                progressClip.setTint(Color.GREEN)
+                isPasswordStrong = true
+            }
         }
     }
 
@@ -61,7 +117,7 @@ class RegisterFragment : Fragment() {
         val password = binding.etPassword.text.toString().trim()
         val phone = binding.etPhone.text.toString().trim()
         val school = binding.etSchool.text.toString().trim()
-        val grade = binding.etGrade.text.toString().trim() // ✅ Get the grade
+        val gradeString = binding.etGrade.text.toString().trim()
         val role = binding.spinnerRole.selectedItem.toString().lowercase()
         val gender = when (binding.rgGender.checkedRadioButtonId) {
             R.id.rbMale -> "Male"
@@ -69,14 +125,19 @@ class RegisterFragment : Fragment() {
             else -> ""
         }
 
-        // ✅ Add grade to the validation check
-        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || phone.isEmpty() || school.isEmpty() || gender.isEmpty() || grade.isEmpty()) {
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || phone.isEmpty() || school.isEmpty() || gender.isEmpty() || gradeString.isEmpty()) {
             Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
             return
         }
 
-        if (password.length < 6) {
-            Toast.makeText(context, "Password must be at least 6 characters long.", Toast.LENGTH_SHORT).show()
+        val grade = gradeString.toIntOrNull()
+        if (grade == null || grade !in 1..12) {
+            Toast.makeText(context, "Please enter a valid grade (1-12).", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!isPasswordStrong) {
+            Toast.makeText(context, "Please use a strong password.", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -87,23 +148,23 @@ class RegisterFragment : Fragment() {
                 val firebaseUser = authResult.user!!
 
                 firebaseUser.sendEmailVerification().addOnSuccessListener {
-                    // ✅ Add grade to the user object
+                    val customId = (10000000..99999999).random().toString()
                     val user = User(
                         uid = firebaseUser.uid,
+                        customId = customId,
                         name = name,
                         email = email,
                         role = role,
                         phone = phone,
                         gender = gender,
                         school = school,
-                        grade = grade
+                        grade = grade.toString()
                     )
 
                     db.collection("users").document(firebaseUser.uid).set(user)
                         .addOnSuccessListener {
                             setLoading(false)
-                            Toast.makeText(context, "Registration successful! Please check your email to verify your account.", Toast.LENGTH_LONG).show()
-                            findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
+                            showVerificationInfoDialog()
                         }
                         .addOnFailureListener { e ->
                             setLoading(false)
@@ -118,6 +179,18 @@ class RegisterFragment : Fragment() {
                 setLoading(false)
                 Toast.makeText(context, "Registration failed: ${e.message}", Toast.LENGTH_LONG).show()
             }
+    }
+
+    private fun showVerificationInfoDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Registration Successful")
+            .setMessage("A verification link has been sent to your email. Please check your inbox and spam folder to activate your account.")
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+                findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
+            }
+            .setCancelable(false)
+            .show()
     }
 
     private fun setLoading(isLoading: Boolean) {

@@ -12,18 +12,16 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
             android:orientation="vertical"
+            android:gravity="center_horizontal"
             android:padding="24dp">
 
             <com.google.android.material.card.MaterialCardView
@@ -47,7 +45,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="24dp"
-                        android:text="Register"
+                        android:text="Create Account"
                         android:textAlignment="center"
                         android:textColor="@color/white"
                         android:textSize="32sp"
@@ -163,7 +161,7 @@
                             android:id="@+id/etGrade"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textCapWords"
+                            android:inputType="number"
                             android:textColor="@color/white"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -180,6 +178,8 @@
                         app:boxCornerRadiusTopEnd="16dp"
                         app:boxCornerRadiusTopStart="16dp"
                         app:boxStrokeColor="@color/white"
+                        app:helperText="Uppercase, Lowercase, Number, Symbol"
+                        app:helperTextTextColor="#B3FFFFFF"
                         app:passwordToggleEnabled="true"
                         app:passwordToggleTint="@color/white"
                         app:startIconDrawable="@drawable/ic_lock"
@@ -191,6 +191,32 @@
                             android:inputType="textPassword"
                             android:textColor="@color/white"/>
                     </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ProgressBar
+                            android:id="@+id/progressPassword"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="0dp"
+                            android:layout_height="8dp"
+                            android:layout_weight="1"
+                            android:max="100"
+                            android:progress="0"
+                            android:progressDrawable="@drawable/password_strength_progress" />
+
+                        <TextView
+                            android:id="@+id/tvPasswordStrength"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:textColor="@color/white"
+                            tools:text="Weak" />
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/tvGenderLabel"
@@ -218,6 +244,7 @@
                         android:backgroundTint="#80FFFFFF"
                         android:popupBackground="#3A6073"
                         android:padding="8dp" />
+
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
@@ -235,7 +262,6 @@
                 app:cornerRadius="16dp" />
 
         </LinearLayout>
-
     </ScrollView>
 
     <ProgressBar
