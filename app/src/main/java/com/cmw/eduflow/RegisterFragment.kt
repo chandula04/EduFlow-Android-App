@@ -34,7 +34,7 @@ class RegisterFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Start background animation
-        val animDrawable = view.background as AnimationDrawable
+        val animDrawable = binding.registerContainer.background as AnimationDrawable
         animDrawable.setEnterFadeDuration(10)
         animDrawable.setExitFadeDuration(5000)
         animDrawable.start()
@@ -56,12 +56,20 @@ class RegisterFragment : Fragment() {
     }
 
     private fun handleRegistration() {
+        // Get data from all fields
         val name = binding.etName.text.toString().trim()
         val email = binding.etEmail.text.toString().trim()
         val password = binding.etPassword.text.toString().trim()
+        val phone = binding.etPhone.text.toString().trim()
+        val school = binding.etSchool.text.toString().trim()
         val role = binding.spinnerRole.selectedItem.toString().lowercase()
+        val gender = when (binding.rgGender.checkedRadioButtonId) {
+            R.id.rbMale -> "Male"
+            R.id.rbFemale -> "Female"
+            else -> ""
+        }
 
-        if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || phone.isEmpty() || school.isEmpty() || gender.isEmpty()) {
             Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
             return
         }
@@ -71,12 +79,18 @@ class RegisterFragment : Fragment() {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnSuccessListener { authResult ->
                 val firebaseUser = authResult.user!!
+
+                // Create User object with all the new data
                 val user = User(
                     uid = firebaseUser.uid,
                     name = name,
                     email = email,
-                    role = role
+                    role = role,
+                    phone = phone,
+                    gender = gender,
+                    school = school
                 )
+
                 db.collection("users").document(firebaseUser.uid).set(user)
                     .addOnSuccessListener {
                         setLoading(false)
