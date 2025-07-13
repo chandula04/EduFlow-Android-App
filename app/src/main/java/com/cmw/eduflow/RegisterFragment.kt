@@ -1,6 +1,5 @@
 package com.cmw.eduflow
 
-import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -33,11 +32,7 @@ class RegisterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Start background animation
-        val animDrawable = binding.registerContainer.background as AnimationDrawable
-        animDrawable.setEnterFadeDuration(10)
-        animDrawable.setExitFadeDuration(5000)
-        animDrawable.start()
+        // The animation code that caused the crash has been removed from here.
 
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()

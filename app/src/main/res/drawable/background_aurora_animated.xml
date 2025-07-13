@@ -1,8 +1,8 @@
 <animation-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/gradient_aurora_1" android:duration="6000" />
-    <item android:drawable="@drawable/gradient_aurora_4" android:duration="6000" />
-    <item android:drawable="@drawable/gradient_aurora_2" android:duration="6000" />
-    <item android:drawable="@drawable/gradient_aurora_5" android:duration="6000" />
-    <item android:drawable="@drawable/gradient_aurora_3" android:duration="6000" />
-    <item android:drawable="@drawable/gradient_aurora_6" android:duration="6000" />
+    <item android:drawable="@drawable/gradient_aurora_1" android:duration="5000" />
+    <item android:drawable="@drawable/gradient_aurora_4" android:duration="5000" />
+    <item android:drawable="@drawable/gradient_aurora_2" android:duration="5000" />
+    <item android:drawable="@drawable/gradient_aurora_5" android:duration="5000" />
+    <item android:drawable="@drawable/gradient_aurora_3" android:duration="5000" />
+    <item android:drawable="@drawable/gradient_aurora_6" android:duration="5000" />
 </animation-list>
