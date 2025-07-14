@@ -10,6 +10,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -28,6 +29,12 @@ class RegisterFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private var isPasswordStrong = false
+
+    // The list of valid, one-time use codes for teacher registration
+    private val validTeacherCodes = setOf(
+        "688665514", "700638266", "554398413", "353827504", "689953911",
+        "796053916", "410349727", "900910995", "003801311", "830394888"
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -98,7 +105,6 @@ class RegisterFragment : Fragment() {
             4 -> {
                 binding.tvPasswordStrength.text = "Strong"
                 binding.progressPassword.progress = 100
-                progressClip.setTint(Color.GREEN)
                 isPasswordStrong = true
             }
         }
@@ -109,6 +115,20 @@ class RegisterFragment : Fragment() {
         val adapter = ArrayAdapter(requireContext(), R.layout.simple_spinner_item_white, roles)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerRole.adapter = adapter
+
+        binding.spinnerRole.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selectedRole = parent?.getItemAtPosition(position).toString()
+                if (selectedRole == "Teacher") {
+                    binding.layoutGrade.visibility = View.GONE
+                    binding.layoutTeacherCode.visibility = View.VISIBLE
+                } else {
+                    binding.layoutGrade.visibility = View.VISIBLE
+                    binding.layoutTeacherCode.visibility = View.GONE
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
     }
 
     private fun handleRegistration() {
@@ -119,21 +139,32 @@ class RegisterFragment : Fragment() {
         val school = binding.etSchool.text.toString().trim()
         val gradeString = binding.etGrade.text.toString().trim()
         val role = binding.spinnerRole.selectedItem.toString().lowercase()
+        val teacherCode = binding.etTeacherCode.text.toString().trim()
         val gender = when (binding.rgGender.checkedRadioButtonId) {
             R.id.rbMale -> "Male"
             R.id.rbFemale -> "Female"
             else -> ""
         }
+        var gradeToSave = gradeString
 
-        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || phone.isEmpty() || school.isEmpty() || gender.isEmpty() || gradeString.isEmpty()) {
-            Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
+        // --- All Validation Checks ---
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || phone.isEmpty() || school.isEmpty() || gender.isEmpty()) {
+            Toast.makeText(context, "Please fill all required fields", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val grade = gradeString.toIntOrNull()
-        if (grade == null || grade !in 1..12) {
-            Toast.makeText(context, "Please enter a valid grade (1-12).", Toast.LENGTH_SHORT).show()
-            return
+        if (role == "teacher") {
+            if (!validTeacherCodes.contains(teacherCode)) {
+                Toast.makeText(context, "The special teacher code is invalid.", Toast.LENGTH_SHORT).show()
+                return
+            }
+            gradeToSave = "" // Teachers don't have a grade
+        } else { // Role is "student"
+            val gradeNum = gradeString.toIntOrNull()
+            if (gradeNum == null || gradeNum !in 1..12) {
+                Toast.makeText(context, "Please enter a valid grade (1-12).", Toast.LENGTH_SHORT).show()
+                return
+            }
         }
 
         if (!isPasswordStrong) {
@@ -158,7 +189,7 @@ class RegisterFragment : Fragment() {
                         phone = phone,
                         gender = gender,
                         school = school,
-                        grade = grade.toString()
+                        grade = gradeToSave
                     )
 
                     db.collection("users").document(firebaseUser.uid).set(user)

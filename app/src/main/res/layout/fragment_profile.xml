@@ -1,140 +1,147 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/profile_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_aurora_animated"
     android:fitsSystemWindows="true"
     tools:context=".ProfileFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/ivProfile"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:layout_marginTop="32dp"
-            android:background="@color/white"
-            android:padding="4dp"
-            android:scaleType="centerCrop"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
-            app:strokeColor="#CCFFFFFF"
-            app:strokeWidth="2dp"
-            tools:srcCompat="@drawable/ic_profile_user" />
-
-        <TextView
-            android:id="@+id/tvChangePhoto"
-            android:layout_width="wrap_content"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="Change Photo"
-            android:textColor="@color/white"
-            app:layout_constraintEnd_toEndOf="@+id/ivProfile"
-            app:layout_constraintStart_toStartOf="@+id/ivProfile"
-            app:layout_constraintTop_toBottomOf="@+id/ivProfile" />
+            android:padding="16dp">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/layoutName"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:hint="Full Name"
-            app:boxStrokeColor="@color/white"
-            app:hintTextColor="@color/white"
-            android:textColorHint="@color/white"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvChangePhoto">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etName"
-                android:layout_width="match_parent"
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivProfile"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_marginTop="32dp"
+                android:background="@color/white"
+                android:padding="4dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+                app:strokeColor="#CCFFFFFF"
+                app:strokeWidth="2dp"
+                tools:srcCompat="@drawable/ic_profile_user" />
+
+            <TextView
+                android:id="@+id/tvChangePhoto"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/white" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/layoutBirthdate"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="Birthdate (YYYY-MM-DD)"
-            app:boxStrokeColor="@color/white"
-            app:hintTextColor="@color/white"
-            android:textColorHint="@color/white"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/layoutName">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etBirthdate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Change Photo"
                 android:textColor="@color/white"
-                android:focusable="false" />
-        </com.google.android.material.textfield.TextInputLayout>
+                app:layout_constraintEnd_toEndOf="@+id/ivProfile"
+                app:layout_constraintStart_toStartOf="@+id/ivProfile"
+                app:layout_constraintTop_toBottomOf="@+id/ivProfile" />
 
-        <TextView
-            android:id="@+id/tvGenderLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Gender"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/layoutBirthdate" />
+            <TextView android:id="@+id/labelId" style="@style/ProfileLabel" android:text="Student ID" app:layout_constraintTop_toBottomOf="@+id/tvChangePhoto" app:layout_constraintStart_toStartOf="parent"/>
+            <TextView android:id="@+id/tvId" style="@style/ProfileValue" app:layout_constraintTop_toBottomOf="@id/labelId" app:layout_constraintStart_toStartOf="parent" tools:text="12345678" />
 
-        <RadioGroup
-            android:id="@+id/rgGender"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvGenderLabel">
-            <RadioButton android:id="@+id/rbMale" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/white" app:buttonTint="@color/white" android:text="Male" />
-            <RadioButton android:id="@+id/rbFemale" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/white" app:buttonTint="@color/white" android:text="Female" />
-            <RadioButton android:id="@+id/rbOther" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/white" app:buttonTint="@color/white" android:text="Other" />
-        </RadioGroup>
+            <TextView android:id="@+id/labelEmail" style="@style/ProfileLabel" android:text="Email" app:layout_constraintTop_toBottomOf="@+id/tvId" app:layout_constraintStart_toStartOf="parent"/>
+            <TextView android:id="@+id/tvEmail" style="@style/ProfileValue" app:layout_constraintTop_toBottomOf="@id/labelEmail" app:layout_constraintStart_toStartOf="parent" tools:text="student@example.com" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnChangeEmail"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Change Email"
+                android:textColor="@color/white"
+                app:strokeColor="@color/white"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvEmail"/>
 
-        <Button
-            android:id="@+id/btnUpdateProfile"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="Update Profile"
-            android:backgroundTint="#CCFFFFFF"
-            android:textColor="#3A6073"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/rgGender" />
+            <TextView android:id="@+id/labelRole" style="@style/ProfileLabel" android:text="Role" app:layout_constraintTop_toBottomOf="@+id/btnChangeEmail" app:layout_constraintStart_toStartOf="parent"/>
+            <TextView android:id="@+id/tvRole" style="@style/ProfileValue" app:layout_constraintTop_toBottomOf="@id/labelRole" app:layout_constraintStart_toStartOf="parent" tools:text="Student" />
 
-        <Button
-            android:id="@+id/btnDeleteAccount"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Delete Account"
-            android:textColor="#FF8A80"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnUpdateProfile" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutName" style="@style/ProfileTextInputLayout" app:layout_constraintTop_toBottomOf="@+id/tvRole" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toStartOf="@+id/ivEditName" android:hint="Full Name">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etName" style="@style/ProfileEditText"/>
+            </com.google.android.material.textfield.TextInputLayout>
+            <ImageView android:id="@+id/ivEditName" style="@style/ProfileEditIcon" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="@id/layoutName" app:layout_constraintBottom_toBottomOf="@id/layoutName" />
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutPhone" style="@style/ProfileTextInputLayout" app:layout_constraintTop_toBottomOf="@+id/layoutName" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toStartOf="@+id/ivEditPhone" android:hint="Phone">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPhone" style="@style/ProfileEditText" android:inputType="phone"/>
+            </com.google.android.material.textfield.TextInputLayout>
+            <ImageView android:id="@+id/ivEditPhone" style="@style/ProfileEditIcon" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="@id/layoutPhone" app:layout_constraintBottom_toBottomOf="@id/layoutPhone" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutSchool" style="@style/ProfileTextInputLayout" app:layout_constraintTop_toBottomOf="@+id/layoutPhone" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toStartOf="@+id/ivEditSchool" android:hint="School">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etSchool" style="@style/ProfileEditText"/>
+            </com.google.android.material.textfield.TextInputLayout>
+            <ImageView android:id="@+id/ivEditSchool" style="@style/ProfileEditIcon" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="@id/layoutSchool" app:layout_constraintBottom_toBottomOf="@id/layoutSchool" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutGrade" style="@style/ProfileTextInputLayout" app:layout_constraintTop_toBottomOf="@+id/layoutSchool" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toStartOf="@+id/ivEditGrade" android:hint="Grade">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etGrade" style="@style/ProfileEditText" android:inputType="number"/>
+            </com.google.android.material.textfield.TextInputLayout>
+            <ImageView android:id="@+id/ivEditGrade" style="@style/ProfileEditIcon" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="@id/layoutGrade" app:layout_constraintBottom_toBottomOf="@id/layoutGrade" />
+
+            <TextView android:id="@+id/labelGender" style="@style/ProfileLabel" android:text="Gender" app:layout_constraintTop_toBottomOf="@id/layoutGrade" app:layout_constraintStart_toStartOf="parent" />
+            <RadioGroup
+                android:id="@+id/rgGender"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelGender">
+                <RadioButton android:id="@+id/rbMale" style="@style/ProfileRadioButton" android:text="Male" />
+                <RadioButton android:id="@+id/rbFemale" style="@style/ProfileRadioButton" android:text="Female" />
+                <RadioButton android:id="@+id/rbOther" style="@style/ProfileRadioButton" android:text="Other" />
+            </RadioGroup>
+            <ImageView android:id="@+id/ivEditGender" style="@style/ProfileEditIcon" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="@id/rgGender" app:layout_constraintBottom_toBottomOf="@id/rgGender" />
+
+            <Button
+                android:id="@+id/btnUpdateProfile"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="Update Profile"
+                android:backgroundTint="#CCFFFFFF"
+                android:textColor="#3A6073"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/rgGender" />
+
+            <Button
+                android:id="@+id/btnDeleteAccount"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Delete Account"
+                android:textColor="#FF8A80"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnUpdateProfile" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

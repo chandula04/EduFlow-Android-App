@@ -166,6 +166,30 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutTeacherCode"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:hint="Special Teacher Code"
+                        android:visibility="gone"
+                        android:textColorHint="#B3FFFFFF"
+                        app:boxCornerRadiusBottomEnd="16dp"
+                        app:boxCornerRadiusBottomStart="16dp"
+                        app:boxCornerRadiusTopEnd="16dp"
+                        app:boxCornerRadiusTopStart="16dp"
+                        app:boxStrokeColor="@color/white"
+                        app:startIconDrawable="@drawable/ic_lock"
+                        app:startIconTint="@color/white">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etTeacherCode"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            android:textColor="@color/white"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/layoutPassword"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
@@ -244,7 +268,6 @@
                         android:backgroundTint="#80FFFFFF"
                         android:popupBackground="#3A6073"
                         android:padding="8dp" />
-
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
