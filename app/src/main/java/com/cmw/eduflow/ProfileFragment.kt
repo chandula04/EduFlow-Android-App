@@ -27,6 +27,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import java.util.*
+import android.widget.TextView
 
 class ProfileFragment : Fragment() {
 
@@ -89,7 +90,6 @@ class ProfileFragment : Fragment() {
                     binding.etEmail.setText(document.getString("email"))
                     binding.etPhone.setText(document.getString("phone"))
                     binding.etSchool.setText(document.getString("school"))
-                    binding.etGrade.setText(document.getString("grade"))
                     binding.etBirthdate.setText(document.getString("birthdate"))
                     binding.etBio.setText(document.getString("bio"))
 
@@ -98,6 +98,7 @@ class ProfileFragment : Fragment() {
                         binding.layoutGrade.visibility = View.GONE
                     } else {
                         binding.layoutGrade.visibility = View.VISIBLE
+                        binding.etGrade.setText(document.getString("grade"))
                     }
 
                     val gender = document.getString("gender")
@@ -132,7 +133,6 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        // ✅ FIXED: ADDED CLICK LISTENER
         binding.btnChangeEmail.setOnClickListener {
             showChangeEmailDialog()
         }
@@ -157,7 +157,7 @@ class ProfileFragment : Fragment() {
         binding.etBio.isEnabled = editing
         binding.spinnerGender.isEnabled = editing
 
-        // ✅ FIXED: ENABLE BIRTHDATE FIELD IN EDIT MODE
+        // ✅ FIX: This enables the birthday field so it can be clicked
         binding.etBirthdate.isEnabled = editing
 
         if (binding.layoutGrade.visibility == View.VISIBLE) {
@@ -171,31 +171,170 @@ class ProfileFragment : Fragment() {
     }
 
     private fun handleUpdate() {
-        // ... (this function is unchanged)
+        val gradeStr = binding.etGrade.text.toString()
+
+        if (binding.layoutGrade.visibility == View.VISIBLE) {
+            val grade = gradeStr.toIntOrNull()
+            if (grade == null || grade !in 1..12) {
+                binding.etGrade.error = "Grade must be between 1 and 12"
+                return
+            }
+        }
+
+        val userId = auth.currentUser?.uid ?: return
+        val userUpdates = mutableMapOf<String, Any>(
+            "name" to binding.etName.text.toString(),
+            "phone" to binding.etPhone.text.toString(),
+            "school" to binding.etSchool.text.toString(),
+            "birthdate" to binding.etBirthdate.text.toString(),
+            "gender" to binding.spinnerGender.selectedItem.toString(),
+            "bio" to binding.etBio.text.toString()
+        )
+
+        if (binding.layoutGrade.visibility == View.VISIBLE) {
+            userUpdates["grade"] = gradeStr
+        }
+
+        setLoading(true)
+        db.collection("users").document(userId).update(userUpdates)
+            .addOnSuccessListener {
+                setLoading(false)
+                toggleEditMode(false)
+                loadUserProfile()
+                showSuccessDialog("Profile Updated", "Your changes have been saved successfully!")
+            }
+            .addOnFailureListener { e ->
+                setLoading(false)
+                Toast.makeText(context, "Update failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun showDatePickerDialog() {
-        // ... (this function is unchanged)
+        val c = Calendar.getInstance()
+        val year = c.get(Calendar.YEAR)
+        val month = c.get(Calendar.MONTH)
+        val day = c.get(Calendar.DAY_OF_MONTH)
+        DatePickerDialog(requireContext(), { _, y, m, d ->
+            binding.etBirthdate.setText("$d/${m + 1}/$y")
+        }, year, month, day).show()
     }
 
-    private fun showSuccessDialog() {
-        // ... (this function is unchanged)
+    private fun showSuccessDialog(title: String, message: String) {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_success, null)
+        val dialog = AlertDialog.Builder(requireContext()).setView(dialogView).create()
+
+        val successTitle = dialogView.findViewById<TextView>(R.id.tvSuccessTitle)
+        val successMessage = dialogView.findViewById<TextView>(R.id.tvSuccessMessage)
+        successTitle.text = title
+        successMessage.text = message
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        dialogView.findViewById<Button>(R.id.btnGotIt).setOnClickListener {
+            dialog.dismiss()
+        }
+        dialogView.findViewById<Button>(R.id.btnGoHome).setOnClickListener {
+            dialog.dismiss()
+            findNavController().navigate(R.id.homeFragment)
+        }
+
+        dialog.show()
     }
 
     private fun showChangeEmailDialog() {
-        // ... (this function is unchanged)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_change_email, null)
+        val newEmailEditText = dialogView.findViewById<EditText>(R.id.etNewEmail)
+        val passwordEditText = dialogView.findViewById<EditText>(R.id.etCurrentPassword)
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Change Email")
+            .setView(dialogView)
+            .setPositiveButton("Submit") { _, _ ->
+                val newEmail = newEmailEditText.text.toString().trim()
+                val password = passwordEditText.text.toString().trim()
+                if (newEmail.isNotEmpty() && password.isNotEmpty()) {
+                    reauthenticateAndChangeEmail(newEmail, password)
+                } else {
+                    Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun reauthenticateAndChangeEmail(newEmail: String, password: String) {
-        // ... (this function is unchanged)
+        val user = auth.currentUser ?: return
+        val credential = EmailAuthProvider.getCredential(user.email!!, password)
+
+        setLoading(true)
+        user.reauthenticate(credential).addOnCompleteListener { reauthTask ->
+            if (reauthTask.isSuccessful) {
+                user.verifyBeforeUpdateEmail(newEmail).addOnCompleteListener { task ->
+                    setLoading(false)
+                    if (task.isSuccessful) {
+                        Toast.makeText(context, "Verification link sent! Check your new email and log in again.", Toast.LENGTH_LONG).show()
+                        auth.signOut()
+                        findNavController().navigate(R.id.homeFragment)
+                    } else {
+                        Toast.makeText(context, "Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            } else {
+                setLoading(false)
+                Toast.makeText(context, "Re-authentication failed. Incorrect password.", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     private fun showDeleteConfirmationDialog() {
-        // ... (this function is unchanged)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_reauthenticate, null)
+        val passwordEditText = dialogView.findViewById<EditText>(R.id.etPassword)
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Account")
+            .setMessage("This is permanent. Please enter your password to confirm.")
+            .setView(dialogView)
+            .setPositiveButton("Delete Forever") { _, _ ->
+                val password = passwordEditText.text.toString()
+                if (password.isNotEmpty()) {
+                    reauthenticateAndDelete(password)
+                } else {
+                    Toast.makeText(context, "Password is required.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun reauthenticateAndDelete(password: String) {
-        // ... (this function is unchanged)
+        setLoading(true)
+        val user = auth.currentUser ?: return
+        val credential = EmailAuthProvider.getCredential(user.email!!, password)
+
+        user.reauthenticate(credential).addOnCompleteListener { reauthTask ->
+            if (reauthTask.isSuccessful) {
+                db.collection("users").document(user.uid).delete()
+                    .addOnCompleteListener { firestoreTask ->
+                        if(firestoreTask.isSuccessful) {
+                            user.delete().addOnCompleteListener { authTask ->
+                                setLoading(false)
+                                if(authTask.isSuccessful) {
+                                    Toast.makeText(context, "Account permanently deleted.", Toast.LENGTH_SHORT).show()
+                                    findNavController().navigate(R.id.homeFragment)
+                                } else {
+                                    Toast.makeText(context, "Account deletion failed. Please try again.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        } else {
+                            setLoading(false)
+                            Toast.makeText(context, "Could not delete user data. Please try again.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+            } else {
+                setLoading(false)
+                Toast.makeText(context, "Incorrect password. Deletion cancelled.", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun setLoading(isLoading: Boolean) {
