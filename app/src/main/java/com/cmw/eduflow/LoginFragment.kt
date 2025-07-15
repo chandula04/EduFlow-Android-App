@@ -97,17 +97,12 @@ class LoginFragment : Fragment() {
         db.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
-                    // ✅ SYNC EMAIL FIX
-                    // Get the latest email from Firebase Auth
                     val authEmail = user.email
                     val firestoreEmail = document.getString("email")
-
-                    // If the emails don't match, update the database
                     if (authEmail != null && authEmail != firestoreEmail) {
                         db.collection("users").document(userId).update("email", authEmail)
                     }
 
-                    // Continue with navigation
                     val role = document.getString("role")
                     val action = when (role) {
                         "admin" -> R.id.action_loginFragment_to_adminDashboardFragment
@@ -117,6 +112,10 @@ class LoginFragment : Fragment() {
                     }
 
                     if (action != null) {
+                        // ✅ SAVE THE LOGGED-IN STATE
+                        val prefs = requireActivity().getSharedPreferences("EduFlowPrefs", Context.MODE_PRIVATE)
+                        prefs.edit().putBoolean("isLoggedIn", true).apply()
+
                         findNavController().navigate(action)
                     } else {
                         setLoading(false)
@@ -132,8 +131,6 @@ class LoginFragment : Fragment() {
                 Toast.makeText(context, "Failed to get user role: ${exception.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
-    // ... saveCredentials, loadCredentials, clearCredentials, setLoading, and onDestroyView methods are unchanged ...
 
     private fun saveCredentials(email: String, pass: String) {
         val prefs = requireActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -156,7 +153,7 @@ class LoginFragment : Fragment() {
 
     private fun clearCredentials() {
         val prefs = requireActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().clear().apply()
+        prefs.edit().remove(KEY_EMAIL).remove(KEY_PASSWORD).remove(KEY_REMEMBER).apply()
     }
 
     private fun setLoading(isLoading: Boolean) {

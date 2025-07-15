@@ -102,6 +102,16 @@
         android:id="@+id/studentDashboardFragment"
         android:name="com.cmw.eduflow.StudentDashboardFragment"
         android:label="Student Dashboard"
-        tools:layout="@layout/fragment_student_dashboard" />
+        tools:layout="@layout/fragment_student_dashboard">
+        <action
+            android:id="@+id/action_studentDashboardFragment_to_courseMaterialsFragment"
+            app:destination="@id/courseMaterialsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/courseMaterialsFragment"
+        android:name="com.cmw.eduflow.CourseMaterialsFragment"
+        android:label="Course Materials"
+        tools:layout="@layout/fragment_course_materials" />
 
 </navigation>

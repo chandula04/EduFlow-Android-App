@@ -1,5 +1,6 @@
 package com.cmw.eduflow
 
+import android.content.Context
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -31,7 +32,6 @@ class StudentDashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Start the animated background
         val animDrawable = binding.mainContainer.background as AnimationDrawable
         animDrawable.setEnterFadeDuration(10)
         animDrawable.setExitFadeDuration(5000)
@@ -58,7 +58,6 @@ class StudentDashboardFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        // Handle Toolbar Menu item clicks (Profile and Logout)
         binding.toolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_profile -> {
@@ -66,6 +65,10 @@ class StudentDashboardFragment : Fragment() {
                     true
                 }
                 R.id.action_logout -> {
+                    // ✅ CLEAR THE LOGGED-IN STATE
+                    val prefs = requireActivity().getSharedPreferences("EduFlowPrefs", Context.MODE_PRIVATE)
+                    prefs.edit().putBoolean("isLoggedIn", false).apply()
+
                     auth.signOut()
                     findNavController().navigate(R.id.homeFragment)
                     true
@@ -74,17 +77,14 @@ class StudentDashboardFragment : Fragment() {
             }
         }
 
-        // Placeholder Click Listeners for Feature Cards
         binding.cardViewAttendance.setOnClickListener {
             Toast.makeText(context, "Attendance feature coming soon!", Toast.LENGTH_SHORT).show()
         }
-
         binding.cardViewAssignments.setOnClickListener {
             Toast.makeText(context, "Assignments feature coming soon!", Toast.LENGTH_SHORT).show()
         }
-
         binding.cardViewMaterials.setOnClickListener {
-            Toast.makeText(context, "Materials feature coming soon!", Toast.LENGTH_SHORT).show()
+            findNavController().navigate(R.id.action_studentDashboardFragment_to_courseMaterialsFragment)
         }
     }
 

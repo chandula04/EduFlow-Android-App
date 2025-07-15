@@ -1,5 +1,6 @@
 package com.cmw.eduflow
 
+import android.content.Context
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.util.Log
@@ -7,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.cmw.eduflow.databinding.FragmentHomeBinding
@@ -21,7 +21,6 @@ class HomeFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
-    private lateinit var authStateListener: FirebaseAuth.AuthStateListener
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,16 +30,19 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
+    override fun onStart() {
+        super.onStart()
+        // Check session when the fragment becomes visible
+        checkUserSession()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        Log.d("AuthDebug", "HomeFragment onViewCreated") // DEBUG LOG
 
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
         setupAnimations()
-        setupAuthStateListener()
 
         binding.btnGetStarted.setOnClickListener {
             findNavController().navigate(R.id.action_homeFragment_to_loginFragment)
@@ -57,35 +59,35 @@ class HomeFragment : Fragment() {
         binding.btnGetStarted.startAnimation(pulseAnimation)
     }
 
-    private fun setupAuthStateListener() {
-        Log.d("AuthDebug", "Setting up AuthStateListener.") // DEBUG LOG
-        authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-            val user = firebaseAuth.currentUser
-            if (user != null) {
-                // User is signed in
-                Log.d("AuthDebug", "Listener fired: User is SIGNED IN with UID: ${user.uid}") // DEBUG LOG
-                navigateToDashboard(user.uid)
-            } else {
-                // User is signed out
-                Log.d("AuthDebug", "Listener fired: User is SIGNED OUT.") // DEBUG LOG
-            }
+    private fun checkUserSession() {
+        val prefs = requireActivity().getSharedPreferences("EduFlowPrefs", Context.MODE_PRIVATE)
+        val isLoggedIn = prefs.getBoolean("isLoggedIn", false)
+        val user = auth.currentUser
+
+        Log.d("AuthDebug", "Checking session. isLoggedIn flag: $isLoggedIn, currentUser: ${user?.uid}")
+
+        if (isLoggedIn && user != null) {
+            navigateToDashboard(user.uid)
         }
     }
 
     private fun navigateToDashboard(userId: String) {
-        // ... (this function is unchanged)
-    }
-
-    override fun onStart() {
-        super.onStart()
-        Log.d("AuthDebug", "onStart: Adding AuthStateListener.") // DEBUG LOG
-        auth.addAuthStateListener(authStateListener)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d("AuthDebug", "onStop: Removing AuthStateListener.") // DEBUG LOG
-        auth.removeAuthStateListener(authStateListener)
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                // Check if fragment is still added to prevent crash on rapid navigation
+                if (isAdded && findNavController().currentDestination?.id == R.id.homeFragment) {
+                    if (document != null && document.exists()) {
+                        val role = document.getString("role")
+                        val action = when (role) {
+                            "admin" -> R.id.action_homeFragment_to_adminDashboardFragment
+                            "teacher" -> R.id.action_homeFragment_to_teacherDashboardFragment
+                            "student" -> R.id.action_homeFragment_to_studentDashboardFragment
+                            else -> null
+                        }
+                        action?.let { findNavController().navigate(it) }
+                    }
+                }
+            }
     }
 
     override fun onDestroyView() {
