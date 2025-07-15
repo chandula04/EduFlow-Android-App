@@ -48,18 +48,13 @@ class LoginFragment : Fragment() {
         db = FirebaseFirestore.getInstance()
 
         loadCredentials()
+        setupClickListeners()
+    }
 
-        binding.btnLogin.setOnClickListener {
-            handleLogin()
-        }
-
-        binding.tvGoToRegister.setOnClickListener {
-            findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
-        }
-
-        binding.tvForgotPassword.setOnClickListener {
-            findNavController().navigate(R.id.action_loginFragment_to_forgotPasswordFragment)
-        }
+    private fun setupClickListeners() {
+        binding.btnLogin.setOnClickListener { handleLogin() }
+        binding.tvGoToRegister.setOnClickListener { findNavController().navigate(R.id.action_loginFragment_to_registerFragment) }
+        binding.tvForgotPassword.setOnClickListener { findNavController().navigate(R.id.action_loginFragment_to_forgotPasswordFragment) }
     }
 
     private fun handleLogin() {
@@ -68,7 +63,6 @@ class LoginFragment : Fragment() {
 
         if (email.isNotEmpty() && password.isNotEmpty()) {
             setLoading(true)
-
             if (binding.cbRememberMe.isChecked) {
                 saveCredentials(email, password)
             } else {
@@ -79,14 +73,12 @@ class LoginFragment : Fragment() {
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val user = auth.currentUser
-                        // Check if email is verified
                         if (user != null && user.isEmailVerified) {
-                            Log.d("LoginDebug", "Email is verified.")
                             checkUserRoleAndNavigate(user.uid)
                         } else {
                             setLoading(false)
-                            Toast.makeText(context, "Please verify your email address before logging in.", Toast.LENGTH_LONG).show()
-                            auth.signOut() // Sign out to force re-login after verification
+                            Toast.makeText(context, "Please verify your email address.", Toast.LENGTH_LONG).show()
+                            auth.signOut()
                         }
                     } else {
                         setLoading(false)
@@ -97,6 +89,51 @@ class LoginFragment : Fragment() {
             Toast.makeText(context, "Please enter email and password", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun checkUserRoleAndNavigate(userId: String) {
+        setLoading(true)
+        val user = auth.currentUser ?: return
+
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    // ✅ SYNC EMAIL FIX
+                    // Get the latest email from Firebase Auth
+                    val authEmail = user.email
+                    val firestoreEmail = document.getString("email")
+
+                    // If the emails don't match, update the database
+                    if (authEmail != null && authEmail != firestoreEmail) {
+                        db.collection("users").document(userId).update("email", authEmail)
+                    }
+
+                    // Continue with navigation
+                    val role = document.getString("role")
+                    val action = when (role) {
+                        "admin" -> R.id.action_loginFragment_to_adminDashboardFragment
+                        "teacher" -> R.id.action_loginFragment_to_teacherDashboardFragment
+                        "student" -> R.id.action_loginFragment_to_studentDashboardFragment
+                        else -> null
+                    }
+
+                    if (action != null) {
+                        findNavController().navigate(action)
+                    } else {
+                        setLoading(false)
+                        Toast.makeText(context, "Unknown user role.", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    setLoading(false)
+                    Toast.makeText(context, "User data not found.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { exception ->
+                setLoading(false)
+                Toast.makeText(context, "Failed to get user role: ${exception.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    // ... saveCredentials, loadCredentials, clearCredentials, setLoading, and onDestroyView methods are unchanged ...
 
     private fun saveCredentials(email: String, pass: String) {
         val prefs = requireActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -120,50 +157,6 @@ class LoginFragment : Fragment() {
     private fun clearCredentials() {
         val prefs = requireActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().clear().apply()
-    }
-
-    private fun checkUserRoleAndNavigate(userId: String?) {
-        if (userId == null) {
-            setLoading(false)
-            return
-        }
-
-        Log.d("LoginDebug", "Checking Firestore for user: $userId")
-        setLoading(true)
-        db.collection("users").document(userId).get()
-            .addOnSuccessListener { document ->
-                Log.d("LoginDebug", "Firestore call successful.")
-                if (document != null && document.exists()) {
-                    Log.d("LoginDebug", "Document found.")
-                    val role = document.getString("role")
-                    Log.d("LoginDebug", "User role from Firestore: $role")
-
-                    val action = when (role) {
-                        "admin" -> R.id.action_loginFragment_to_adminDashboardFragment
-                        "teacher" -> R.id.action_loginFragment_to_teacherDashboardFragment
-                        "student" -> R.id.action_loginFragment_to_studentDashboardFragment
-                        else -> null
-                    }
-
-                    if (action != null) {
-                        Log.d("LoginDebug", "Navigating to the correct dashboard.")
-                        findNavController().navigate(action)
-                    } else {
-                        setLoading(false)
-                        Log.d("LoginDebug", "Role is unknown or null. No navigation.")
-                        Toast.makeText(context, "Unknown user role.", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    setLoading(false)
-                    Log.d("LoginDebug", "Document does not exist for this user.")
-                    Toast.makeText(context, "User data not found. Please register again.", Toast.LENGTH_SHORT).show()
-                }
-            }
-            .addOnFailureListener { exception ->
-                setLoading(false)
-                Log.e("LoginDebug", "Firestore call failed: ${exception.message}")
-                Toast.makeText(context, "Failed to get user role: ${exception.message}", Toast.LENGTH_SHORT).show()
-            }
     }
 
     private fun setLoading(isLoading: Boolean) {
