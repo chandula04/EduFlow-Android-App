@@ -96,7 +96,12 @@
                     android:layout_alignParentEnd="true"/>
             </RelativeLayout>
 
-            <include layout="@layout/item_assignment" android:layout_marginTop="12dp"/>
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp">
+                <include layout="@layout/item_assignment" />
+            </FrameLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -118,7 +123,12 @@
                     android:layout_alignParentEnd="true"/>
             </RelativeLayout>
 
-            <include layout="@layout/item_course_material_detailed" android:layout_marginTop="12dp"/>
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp">
+                <include layout="@layout/item_course_material_detailed" />
+            </FrameLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
