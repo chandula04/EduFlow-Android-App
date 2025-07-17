@@ -1,17 +1,22 @@
 package com.cmw.eduflow
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.cmw.eduflow.databinding.FragmentTeacherDashboardBinding
+import com.google.firebase.auth.FirebaseAuth
 
 class TeacherDashboardFragment : Fragment() {
 
     private var _binding: FragmentTeacherDashboardBinding? = null
     private val binding get() = _binding!!
+
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -24,14 +29,34 @@ class TeacherDashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Remove old animation and data fetching logic for now
+        auth = FirebaseAuth.getInstance()
+
+        setupToolbar()
 
         binding.btnScanQr.setOnClickListener {
-            // TODO: Add QR Scanner Logic
             Toast.makeText(context, "QR Scanner Clicked!", Toast.LENGTH_SHORT).show()
         }
+    }
 
-        // You can add other click listeners for "Create Now", "Upload Now", etc.
+    private fun setupToolbar() {
+        binding.toolbar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.action_profile -> {
+                    findNavController().navigate(R.id.action_global_profileFragment)
+                    true
+                }
+                R.id.action_logout -> {
+                    // Clear the logged-in flag
+                    val prefs = requireActivity().getSharedPreferences("EduFlowPrefs", Context.MODE_PRIVATE)
+                    prefs.edit().putBoolean("isLoggedIn", false).apply()
+
+                    auth.signOut()
+                    findNavController().navigate(R.id.homeFragment)
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
     override fun onDestroyView() {
