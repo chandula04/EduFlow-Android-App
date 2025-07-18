@@ -32,8 +32,7 @@ class TeacherDashboardFragment : Fragment() {
         if (result.contents == null) {
             Toast.makeText(context, "Scan cancelled", Toast.LENGTH_LONG).show()
         } else {
-            // Later, you will use this result to mark attendance
-            Toast.makeText(context, "Scanned Student ID: ${result.contents}", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Scanned: ${result.contents}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -67,6 +66,7 @@ class TeacherDashboardFragment : Fragment() {
 
     private fun fetchData() {
         setLoading(true)
+        // Fetch assignments
         db.collection("assignments")
             .orderBy("dueDate", Query.Direction.DESCENDING)
             .limit(4)
@@ -76,10 +76,11 @@ class TeacherDashboardFragment : Fragment() {
                 assignmentAdapter.submitList(assignments)
             }
             .addOnFailureListener {
-                setLoading(false) // Stop loading even if one fails
+                setLoading(false)
                 Toast.makeText(context, "Failed to load assignments", Toast.LENGTH_SHORT).show()
             }
 
+        // Fetch course materials
         db.collection("materials")
             .orderBy("uploadedAt", Query.Direction.DESCENDING)
             .limit(3)
@@ -87,7 +88,7 @@ class TeacherDashboardFragment : Fragment() {
             .addOnSuccessListener { result ->
                 val materials = result.toObjects(CourseMaterial::class.java)
                 materialAdapter.submitList(materials)
-                setLoading(false) // Hide loading after all data is fetched
+                setLoading(false)
             }
             .addOnFailureListener {
                 setLoading(false)
@@ -95,14 +96,12 @@ class TeacherDashboardFragment : Fragment() {
             }
     }
 
-    // ✅ UPDATED SCANNER LAUNCH FUNCTION
     private fun launchScanner() {
         val options = ScanOptions()
         options.setPrompt("Scan a student's QR code")
         options.setBeepEnabled(true)
-        // Tell the scanner to use our new portrait-only activity
         options.setCaptureActivity(CaptureActivityPortrait::class.java)
-        options.setOrientationLocked(false) // Allow our activity to control orientation
+        options.setOrientationLocked(false)
         qrScannerLauncher.launch(options)
     }
 
