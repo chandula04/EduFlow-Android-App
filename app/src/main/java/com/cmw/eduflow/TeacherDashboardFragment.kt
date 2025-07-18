@@ -18,12 +18,14 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.cmw.eduflow.databinding.FragmentTeacherDashboardBinding
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.storage.FirebaseStorage
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import java.util.*
@@ -35,7 +37,6 @@ class TeacherDashboardFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
-    private lateinit var storage: FirebaseStorage
 
     private lateinit var assignmentAdapter: AssignmentAdapter
     private lateinit var materialAdapter: CourseMaterialAdapter
@@ -48,7 +49,7 @@ class TeacherDashboardFragment : Fragment() {
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
                 selectedPdfUri = uri
-                tvSelectedFileNameInDialog?.text = "File selected!"
+                tvSelectedFileNameInDialog?.text = "File: PDF selected!"
             }
         }
     }
@@ -71,7 +72,6 @@ class TeacherDashboardFragment : Fragment() {
 
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
-        storage = FirebaseStorage.getInstance()
 
         setupToolbar()
         setupRecyclerViews()
@@ -91,17 +91,23 @@ class TeacherDashboardFragment : Fragment() {
 
     private fun fetchData() {
         setLoading(true)
+        // Fetch assignments from Firebase Firestore
         db.collection("assignments")
             .orderBy("dueDate", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, e ->
-                setLoading(false)
-                if (e != null) { return@addSnapshotListener }
+                setLoading(false) // Stop loading after first fetch attempt
+                if (e != null) {
+                    Toast.makeText(context, "Error loading assignments", Toast.LENGTH_SHORT).show()
+                    return@addSnapshotListener
+                }
                 val assignments = snapshots?.toObjects(Assignment::class.java)
                 assignmentAdapter.submitList(assignments)
             }
+        // You would add another listener here for course materials
     }
 
     private fun showCreateAssignmentDialog() {
+        selectedPdfUri = null // Reset previous selections
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_create_assignment, null)
         val etTitle = dialogView.findViewById<TextInputEditText>(R.id.etAssignmentTitle)
         val tvDueDate = dialogView.findViewById<TextView>(R.id.tvDueDate)
@@ -119,7 +125,8 @@ class TeacherDashboardFragment : Fragment() {
             .setPositiveButton("Create") { _, _ ->
                 val title = etTitle.text.toString().trim()
                 if (title.isNotEmpty() && selectedPdfUri != null) {
-                    uploadPdfToFirebaseStorage(title, selectedPdfUri!!, Timestamp(selectedDueDate.time))
+                    // This now calls the Cloudinary upload function
+                    uploadPdfToCloudinaryAndSave(title, selectedPdfUri!!, Timestamp(selectedDueDate.time))
                 } else {
                     Toast.makeText(context, "Please fill all fields and select a PDF.", Toast.LENGTH_SHORT).show()
                 }
@@ -128,21 +135,26 @@ class TeacherDashboardFragment : Fragment() {
             .show()
     }
 
-    private fun uploadPdfToFirebaseStorage(title: String, pdfUri: Uri, dueDate: Timestamp) {
+    private fun uploadPdfToCloudinaryAndSave(title: String, pdfUri: Uri, dueDate: Timestamp) {
         setLoading(true)
-        val fileName = "assignments/${System.currentTimeMillis()}.pdf"
-        val storageRef = storage.reference.child(fileName)
-
-        storageRef.putFile(pdfUri)
-            .addOnSuccessListener {
-                storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                    saveAssignmentToFirestore(title, downloadUrl.toString(), dueDate)
+        // Make sure you have created an "unsigned" upload preset in your Cloudinary settings
+        MediaManager.get().upload(pdfUri)
+            .option("resource_type", "auto")
+            .unsigned("YOUR_UPLOAD_PRESET_NAME") // IMPORTANT: REPLACE WITH YOUR PRESET NAME
+            .callback(object : UploadCallback {
+                override fun onSuccess(requestId: String, resultData: Map<*, *>) {
+                    val fileUrl = resultData["secure_url"].toString()
+                    // After getting the URL from Cloudinary, save the details to Firestore
+                    saveAssignmentToFirestore(title, fileUrl, dueDate)
                 }
-            }
-            .addOnFailureListener { e ->
-                setLoading(false)
-                Toast.makeText(context, "PDF Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
+                override fun onError(requestId: String, error: ErrorInfo) {
+                    setLoading(false)
+                    Toast.makeText(context, "Upload Error: ${error.description}", Toast.LENGTH_LONG).show()
+                }
+                override fun onStart(requestId: String) {}
+                override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {}
+                override fun onReschedule(requestId: String, error: ErrorInfo) {}
+            }).dispatch()
     }
 
     private fun saveAssignmentToFirestore(title: String, fileUrl: String, dueDate: Timestamp) {
@@ -152,7 +164,7 @@ class TeacherDashboardFragment : Fragment() {
             title = title,
             dueDate = dueDate,
             status = "Pending",
-            fileUrl = fileUrl
+            fileUrl = fileUrl // The URL from Cloudinary
         )
 
         db.collection("assignments").document(assignmentId).set(newAssignment)
@@ -162,7 +174,7 @@ class TeacherDashboardFragment : Fragment() {
             }
             .addOnFailureListener { e ->
                 setLoading(false)
-                Toast.makeText(context, "Failed to create assignment: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Failed to save assignment details: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
