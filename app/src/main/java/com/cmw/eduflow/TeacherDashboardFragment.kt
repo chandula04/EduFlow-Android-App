@@ -24,15 +24,16 @@ class TeacherDashboardFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
 
-    // ✅ Define adapters for the lists
     private lateinit var assignmentAdapter: AssignmentAdapter
     private lateinit var materialAdapter: CourseMaterialAdapter
 
+    // QR Code Scanner Launcher
     private val qrScannerLauncher = registerForActivityResult(ScanContract()) { result ->
         if (result.contents == null) {
             Toast.makeText(context, "Scan cancelled", Toast.LENGTH_LONG).show()
         } else {
-            Toast.makeText(context, "Scanned: ${result.contents}", Toast.LENGTH_LONG).show()
+            // Later, you will use this result to mark attendance
+            Toast.makeText(context, "Scanned Student ID: ${result.contents}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -56,43 +57,37 @@ class TeacherDashboardFragment : Fragment() {
         binding.tvUploadMaterial.setOnClickListener { Toast.makeText(context, "Upload Material Clicked", Toast.LENGTH_SHORT).show() }
     }
 
-    // ✅ New function to set up both RecyclerViews
     private fun setupRecyclerViews() {
         assignmentAdapter = AssignmentAdapter()
         binding.rvAssignments.adapter = assignmentAdapter
 
-        // This assumes you have a CourseMaterialAdapter from the student feature
         materialAdapter = CourseMaterialAdapter()
         binding.rvCourseMaterials.adapter = materialAdapter
     }
 
-    // ✅ New function to fetch all data for the dashboard
     private fun fetchData() {
         setLoading(true)
-        // Fetch assignments
         db.collection("assignments")
             .orderBy("dueDate", Query.Direction.DESCENDING)
-            .limit(4) // Get the 4 most recent assignments
+            .limit(4)
             .get()
             .addOnSuccessListener { result ->
                 val assignments = result.toObjects(Assignment::class.java)
                 assignmentAdapter.submitList(assignments)
-                // We are still loading, wait for materials to load
             }
             .addOnFailureListener {
-                setLoading(false)
+                setLoading(false) // Stop loading even if one fails
                 Toast.makeText(context, "Failed to load assignments", Toast.LENGTH_SHORT).show()
             }
 
-        // Fetch course materials
         db.collection("materials")
             .orderBy("uploadedAt", Query.Direction.DESCENDING)
-            .limit(3) // Get the 3 most recent materials
+            .limit(3)
             .get()
             .addOnSuccessListener { result ->
                 val materials = result.toObjects(CourseMaterial::class.java)
                 materialAdapter.submitList(materials)
-                setLoading(false) // Hide loading indicator after all data is fetched
+                setLoading(false) // Hide loading after all data is fetched
             }
             .addOnFailureListener {
                 setLoading(false)
@@ -100,8 +95,36 @@ class TeacherDashboardFragment : Fragment() {
             }
     }
 
-    private fun launchScanner() { /* ... unchanged ... */ }
-    private fun setupToolbar() { /* ... unchanged ... */ }
+    // ✅ UPDATED SCANNER LAUNCH FUNCTION
+    private fun launchScanner() {
+        val options = ScanOptions()
+        options.setPrompt("Scan a student's QR code")
+        options.setBeepEnabled(true)
+        // Tell the scanner to use our new portrait-only activity
+        options.setCaptureActivity(CaptureActivityPortrait::class.java)
+        options.setOrientationLocked(false) // Allow our activity to control orientation
+        qrScannerLauncher.launch(options)
+    }
+
+    private fun setupToolbar() {
+        binding.toolbar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.action_profile -> {
+                    findNavController().navigate(R.id.action_global_profileFragment)
+                    true
+                }
+                R.id.action_logout -> {
+                    val prefs = requireActivity().getSharedPreferences("EduFlowPrefs", Context.MODE_PRIVATE)
+                    prefs.edit().putBoolean("isLoggedIn", false).apply()
+
+                    auth.signOut()
+                    findNavController().navigate(R.id.homeFragment)
+                    true
+                }
+                else -> false
+            }
+        }
+    }
 
     private fun setLoading(isLoading: Boolean) {
         binding.progressBar.isVisible = isLoading
