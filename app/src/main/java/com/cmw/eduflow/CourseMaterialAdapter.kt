@@ -25,7 +25,7 @@ class CourseMaterialAdapter : ListAdapter<CourseMaterial, CourseMaterialAdapter.
 
     class MaterialViewHolder(private val binding: ItemCourseMaterialDetailedBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(material: CourseMaterial) {
-            binding.tvMaterialTitle.text = material.title
+            binding.tvMaterialTitle.text = material.lessonTitle
             val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
             binding.tvUploadDate.text = sdf.format(material.uploadedAt.toDate())
 

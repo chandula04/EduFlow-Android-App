@@ -96,13 +96,20 @@
         android:id="@+id/teacherDashboardFragment"
         android:name="com.cmw.eduflow.TeacherDashboardFragment"
         android:label="Teacher Dashboard"
-        tools:layout="@layout/fragment_teacher_dashboard" />
+        tools:layout="@layout/fragment_teacher_dashboard" >
+        <action
+            android:id="@+id/action_teacherDashboardFragment_to_subjectsFragment"
+            app:destination="@id/subjectsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/studentDashboardFragment"
         android:name="com.cmw.eduflow.StudentDashboardFragment"
         android:label="Student Dashboard"
         tools:layout="@layout/fragment_student_dashboard">
+        <action
+            android:id="@+id/action_studentDashboardFragment_to_assignmentsListFragment"
+            app:destination="@id/assignmentsListFragment" />
         <action
             android:id="@+id/action_studentDashboardFragment_to_courseMaterialsFragment"
             app:destination="@id/courseMaterialsFragment" />
@@ -113,5 +120,34 @@
         android:name="com.cmw.eduflow.CourseMaterialsFragment"
         android:label="Course Materials"
         tools:layout="@layout/fragment_course_materials" />
+
+    <fragment
+        android:id="@+id/subjectsFragment"
+        android:name="com.cmw.eduflow.SubjectsFragment"
+        android:label="Subjects"
+        tools:layout="@layout/fragment_subjects">
+        <action
+            android:id="@+id/action_subjectsFragment_to_materialsListFragment"
+            app:destination="@id/materialsListFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/materialsListFragment"
+        android:name="com.cmw.eduflow.MaterialsListFragment"
+        android:label="{subjectName}"
+        tools:layout="@layout/fragment_materials_list">
+        <argument
+            android:name="subjectId"
+            app:argType="string" />
+        <argument
+            android:name="subjectName"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/assignmentsListFragment"
+        android:name="com.cmw.eduflow.AssignmentsListFragment"
+        android:label="Assignments"
+        tools:layout="@layout/fragment_assignments_list" />
 
 </navigation>
