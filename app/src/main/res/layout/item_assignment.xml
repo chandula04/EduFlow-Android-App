@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardBackgroundColor="@android:color/white"
+    app:cardBackgroundColor="#212121"
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp"
     android:layout_marginBottom="12dp">
@@ -18,7 +18,7 @@
             android:id="@+id/tvAssignmentTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             android:textStyle="bold"
             tools:text="Math Homework - Chapter 3" />
 
@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/tvAssignmentTitle"
-            android:textColor="#666666"
+            android:textColor="#CCCCCC"
             tools:text="Due: Nov 15, 2023" />
 
         <TextView
@@ -48,6 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
+            app:tint="@color/white"
             android:src="@drawable/ic_eye" />
 
         <ImageView
@@ -57,6 +58,7 @@
             android:layout_centerVertical="true"
             android:layout_marginEnd="16dp"
             android:layout_toStartOf="@id/ivView"
+            app:tint="@color/white"
             android:src="@drawable/ic_edit_pencil" />
     </RelativeLayout>
 </com.google.android.material.card.MaterialCardView>

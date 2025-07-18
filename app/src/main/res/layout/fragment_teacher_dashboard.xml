@@ -6,37 +6,52 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:background="@drawable/gradient_aurora_1">
+    android:background="#F7F8FA">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         app:elevation="0dp">
+
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:title="Teacher Dashboard"
-            app:titleTextColor="@color/white"
+            app:titleCentered="true"
+            app:titleTextColor="@android:color/black"
             app:menu="@menu/dashboard_menu"/>
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
 
-            <TextView style="@style/DashboardHeader" android:text="Scan Attendance"/>
-            <com.google.android.material.card.MaterialCardView
-                style="@style/GlassCard"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp">
+                android:text="Scan Attendance"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="20dp"
+                app:cardBackgroundColor="#FEF2F2"
+                app:strokeColor="#F47C7C"
+                app:strokeWidth="1dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -47,13 +62,13 @@
                         android:layout_width="60dp"
                         android:layout_height="60dp"
                         android:src="@drawable/ic_qr_code_scanner"
-                        app:tint="@color/white"/>
+                        app:tint="#EF5350"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Effortlessly mark student attendance by scanning their unique QR codes."
                         android:textAlignment="center"
-                        android:textColor="@color/white"
+                        android:textColor="#B96666"
                         android:layout_marginTop="16dp"/>
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnScanQr"
@@ -62,8 +77,7 @@
                         android:text="Scan QR Code"
                         android:layout_marginTop="16dp"
                         app:icon="@drawable/ic_qr_code_scanner"
-                        app:backgroundTint="@color/white"
-                        android:textColor="#3A6073"/>
+                        app:backgroundTint="#F47C7C"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -71,15 +85,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp">
-                <TextView style="@style/DashboardHeader" android:text="Assignment Management"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Assignment Management"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"/>
                 <TextView
                     android:id="@+id/tvCreateAssignment"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Create Now >"
-                    android:textColor="@color/white"
-                    android:padding="8dp"
-                    android:layout_alignParentEnd="true"/>
+                    android:textColor="#F47C7C"
+                    android:layout_alignParentEnd="true"
+                    android:padding="4dp"/>
             </RelativeLayout>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -96,15 +116,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp">
-                <TextView style="@style/DashboardHeader" android:text="Course Materials"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Course Materials"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"/>
                 <TextView
                     android:id="@+id/tvUploadMaterial"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Upload Now >"
-                    android:textColor="@color/white"
-                    android:padding="8dp"
-                    android:layout_alignParentEnd="true"/>
+                    android:textColor="#F47C7C"
+                    android:layout_alignParentEnd="true"
+                    android:padding="4dp"/>
             </RelativeLayout>
 
             <androidx.recyclerview.widget.RecyclerView
