@@ -6,29 +6,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:background="@drawable/gradient_aurora_1">
+    android:background="@android:color/white">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        app:elevation="0dp">
-
+        android:background="@android:color/white"
+        app:elevation="4dp">
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:title="Teacher Dashboard"
-            app:titleTextColor="@color/white"
             app:menu="@menu/dashboard_menu"/>
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -41,14 +37,13 @@
                 android:text="Scan Attendance"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@color/white"/>
-
+                android:textColor="@android:color/black"/>
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#4AFFFFFF"
+                app:cardBackgroundColor="#FCEFEF"
                 app:strokeWidth="0dp">
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -60,13 +55,12 @@
                         android:layout_width="60dp"
                         android:layout_height="60dp"
                         android:src="@drawable/ic_qr_code_scanner"
-                        app:tint="@color/white"/>
+                        app:tint="#F47C7C"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Effortlessly mark student attendance by scanning their unique QR codes."
                         android:textAlignment="center"
-                        android:textColor="@color/white"
                         android:layout_marginTop="16dp"/>
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnScanQr"
@@ -75,11 +69,78 @@
                         android:text="Scan QR Code"
                         android:layout_marginTop="16dp"
                         app:icon="@drawable/ic_qr_code_scanner"
-                        app:backgroundTint="@color/white"
-                        android:textColor="#3A6073"/>
+                        app:backgroundTint="#F47C7C"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Assignment Management"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"/>
+                <TextView
+                    android:id="@+id/tvCreateAssignment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Create Now >"
+                    android:textColor="#F47C7C"
+                    android:layout_alignParentEnd="true"/>
+            </RelativeLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvAssignments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_assignment"
+                tools:itemCount="2"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Course Materials"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"/>
+                <TextView
+                    android:id="@+id/tvUploadMaterial"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Upload Now >"
+                    android:textColor="#F47C7C"
+                    android:layout_alignParentEnd="true"/>
+            </RelativeLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCourseMaterials"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_course_material_detailed"
+                tools:itemCount="2"/>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

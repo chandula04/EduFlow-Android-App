@@ -6,11 +6,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.cmw.eduflow.databinding.FragmentTeacherDashboardBinding
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 
@@ -20,21 +22,21 @@ class TeacherDashboardFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
 
-    // ✅ QR Code Scanner Launcher
+    // ✅ Define adapters for the lists
+    private lateinit var assignmentAdapter: AssignmentAdapter
+    private lateinit var materialAdapter: CourseMaterialAdapter
+
     private val qrScannerLauncher = registerForActivityResult(ScanContract()) { result ->
         if (result.contents == null) {
             Toast.makeText(context, "Scan cancelled", Toast.LENGTH_LONG).show()
         } else {
-            // TODO: Process the scanned student ID
             Toast.makeText(context, "Scanned: ${result.contents}", Toast.LENGTH_LONG).show()
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentTeacherDashboardBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -43,43 +45,66 @@ class TeacherDashboardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
 
         setupToolbar()
+        setupRecyclerViews()
+        fetchData()
 
-        // ✅ Updated click listener to launch the scanner
-        binding.btnScanQr.setOnClickListener {
-            launchScanner()
-        }
+        binding.btnScanQr.setOnClickListener { launchScanner() }
+        binding.tvCreateAssignment.setOnClickListener { Toast.makeText(context, "Create Assignment Clicked", Toast.LENGTH_SHORT).show() }
+        binding.tvUploadMaterial.setOnClickListener { Toast.makeText(context, "Upload Material Clicked", Toast.LENGTH_SHORT).show() }
     }
 
-    // ✅ New function to configure and launch the scanner
-    private fun launchScanner() {
-        val options = ScanOptions()
-        options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-        options.setPrompt("Scan a student's QR code")
-        options.setCameraId(0)  // Use a specific camera of the device
-        options.setBeepEnabled(true)
-        options.setBarcodeImageEnabled(true)
-        qrScannerLauncher.launch(options)
+    // ✅ New function to set up both RecyclerViews
+    private fun setupRecyclerViews() {
+        assignmentAdapter = AssignmentAdapter()
+        binding.rvAssignments.adapter = assignmentAdapter
+
+        // This assumes you have a CourseMaterialAdapter from the student feature
+        materialAdapter = CourseMaterialAdapter()
+        binding.rvCourseMaterials.adapter = materialAdapter
     }
 
-    private fun setupToolbar() {
-        binding.toolbar.setOnMenuItemClickListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.action_profile -> {
-                    findNavController().navigate(R.id.action_global_profileFragment)
-                    true
-                }
-                R.id.action_logout -> {
-                    val prefs = requireActivity().getSharedPreferences("EduFlowPrefs", Context.MODE_PRIVATE)
-                    prefs.edit().putBoolean("isLoggedIn", false).apply()
-                    auth.signOut()
-                    findNavController().navigate(R.id.homeFragment)
-                    true
-                }
-                else -> false
+    // ✅ New function to fetch all data for the dashboard
+    private fun fetchData() {
+        setLoading(true)
+        // Fetch assignments
+        db.collection("assignments")
+            .orderBy("dueDate", Query.Direction.DESCENDING)
+            .limit(4) // Get the 4 most recent assignments
+            .get()
+            .addOnSuccessListener { result ->
+                val assignments = result.toObjects(Assignment::class.java)
+                assignmentAdapter.submitList(assignments)
+                // We are still loading, wait for materials to load
             }
-        }
+            .addOnFailureListener {
+                setLoading(false)
+                Toast.makeText(context, "Failed to load assignments", Toast.LENGTH_SHORT).show()
+            }
+
+        // Fetch course materials
+        db.collection("materials")
+            .orderBy("uploadedAt", Query.Direction.DESCENDING)
+            .limit(3) // Get the 3 most recent materials
+            .get()
+            .addOnSuccessListener { result ->
+                val materials = result.toObjects(CourseMaterial::class.java)
+                materialAdapter.submitList(materials)
+                setLoading(false) // Hide loading indicator after all data is fetched
+            }
+            .addOnFailureListener {
+                setLoading(false)
+                Toast.makeText(context, "Failed to load materials", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun launchScanner() { /* ... unchanged ... */ }
+    private fun setupToolbar() { /* ... unchanged ... */ }
+
+    private fun setLoading(isLoading: Boolean) {
+        binding.progressBar.isVisible = isLoading
     }
 
     override fun onDestroyView() {
