@@ -70,4 +70,7 @@ dependencies {
 
     // QR Code Scanner (ZXing - Zebra Crossing)
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
+    //FILE UPLOAD
+    implementation("com.cloudinary:cloudinary-android:2.4.0")
 }

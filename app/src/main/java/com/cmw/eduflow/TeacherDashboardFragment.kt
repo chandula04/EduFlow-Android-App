@@ -1,5 +1,6 @@
 package com.cmw.eduflow
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.Context
@@ -26,7 +27,6 @@ import com.google.firebase.storage.FirebaseStorage
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import java.util.*
-import android.app.Activity
 
 class TeacherDashboardFragment : Fragment() {
 
@@ -42,11 +42,14 @@ class TeacherDashboardFragment : Fragment() {
 
     private var selectedPdfUri: Uri? = null
     private var selectedDueDate: Calendar = Calendar.getInstance()
+    private var tvSelectedFileNameInDialog: TextView? = null
 
     private val pdfPickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            selectedPdfUri = result.data?.data
-            Toast.makeText(context, "PDF Selected!", Toast.LENGTH_SHORT).show()
+            result.data?.data?.let { uri ->
+                selectedPdfUri = uri
+                tvSelectedFileNameInDialog?.text = "File selected!"
+            }
         }
     }
 
@@ -75,11 +78,7 @@ class TeacherDashboardFragment : Fragment() {
         fetchData()
 
         binding.btnScanQr.setOnClickListener { launchScanner() }
-
-        // ✅ FIXED: Make "Create Now" button functional
         binding.tvCreateAssignment.setOnClickListener { showCreateAssignmentDialog() }
-
-        binding.tvUploadMaterial.setOnClickListener { Toast.makeText(context, "Upload Material Clicked", Toast.LENGTH_SHORT).show() }
     }
 
     private fun setupRecyclerViews() {
@@ -95,18 +94,10 @@ class TeacherDashboardFragment : Fragment() {
         db.collection("assignments")
             .orderBy("dueDate", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, e ->
-                if (e != null) { setLoading(false); return@addSnapshotListener }
-                val assignments = snapshots?.toObjects(Assignment::class.java)
-                assignmentAdapter.submitList(assignments)
-            }
-
-        db.collection("materials")
-            .orderBy("uploadedAt", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshots, e ->
                 setLoading(false)
                 if (e != null) { return@addSnapshotListener }
-                val materials = snapshots?.toObjects(CourseMaterial::class.java)
-                materialAdapter.submitList(materials)
+                val assignments = snapshots?.toObjects(Assignment::class.java)
+                assignmentAdapter.submitList(assignments)
             }
     }
 
@@ -115,10 +106,9 @@ class TeacherDashboardFragment : Fragment() {
         val etTitle = dialogView.findViewById<TextInputEditText>(R.id.etAssignmentTitle)
         val tvDueDate = dialogView.findViewById<TextView>(R.id.tvDueDate)
         val btnSelectPdf = dialogView.findViewById<Button>(R.id.btnSelectPdf)
-        val tvSelectedFile = dialogView.findViewById<TextView>(R.id.tvSelectedFile)
+        tvSelectedFileNameInDialog = dialogView.findViewById(R.id.tvSelectedFile)
 
         tvDueDate.setOnClickListener { showDatePickerDialog(tvDueDate) }
-
         btnSelectPdf.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply { type = "application/pdf" }
             pdfPickerLauncher.launch(intent)
@@ -129,7 +119,7 @@ class TeacherDashboardFragment : Fragment() {
             .setPositiveButton("Create") { _, _ ->
                 val title = etTitle.text.toString().trim()
                 if (title.isNotEmpty() && selectedPdfUri != null) {
-                    uploadAssignment(title, selectedPdfUri!!, Timestamp(selectedDueDate.time))
+                    uploadPdfToFirebaseStorage(title, selectedPdfUri!!, Timestamp(selectedDueDate.time))
                 } else {
                     Toast.makeText(context, "Please fill all fields and select a PDF.", Toast.LENGTH_SHORT).show()
                 }
@@ -138,9 +128,9 @@ class TeacherDashboardFragment : Fragment() {
             .show()
     }
 
-    private fun uploadAssignment(title: String, pdfUri: Uri, dueDate: Timestamp) {
+    private fun uploadPdfToFirebaseStorage(title: String, pdfUri: Uri, dueDate: Timestamp) {
         setLoading(true)
-        val fileName = "assignments/${System.currentTimeMillis()}_${title.replace(" ", "_")}.pdf"
+        val fileName = "assignments/${System.currentTimeMillis()}.pdf"
         val storageRef = storage.reference.child(fileName)
 
         storageRef.putFile(pdfUri)
@@ -151,7 +141,7 @@ class TeacherDashboardFragment : Fragment() {
             }
             .addOnFailureListener { e ->
                 setLoading(false)
-                Toast.makeText(context, "Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "PDF Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -161,8 +151,8 @@ class TeacherDashboardFragment : Fragment() {
             id = assignmentId,
             title = title,
             dueDate = dueDate,
-            status = "Pending"
-            // You would also save the fileUrl in your Assignment data class
+            status = "Pending",
+            fileUrl = fileUrl
         )
 
         db.collection("assignments").document(assignmentId).set(newAssignment)
