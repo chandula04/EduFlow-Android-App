@@ -140,7 +140,7 @@ class TeacherDashboardFragment : Fragment() {
         // Make sure you have created an "unsigned" upload preset in your Cloudinary settings
         MediaManager.get().upload(pdfUri)
             .option("resource_type", "auto")
-            .unsigned("YOUR_UPLOAD_PRESET_NAME") // IMPORTANT: REPLACE WITH YOUR PRESET NAME
+            .unsigned("eduflow_unsigned") // IMPORTANT: REPLACE WITH YOUR PRESET NAME
             .callback(object : UploadCallback {
                 override fun onSuccess(requestId: String, resultData: Map<*, *>) {
                     val fileUrl = resultData["secure_url"].toString()
