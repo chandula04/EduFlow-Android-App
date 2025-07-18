@@ -18,6 +18,8 @@
             android:id="@+id/tvAssignmentTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_toStartOf="@+id/ivEdit"
+            android:layout_alignParentStart="true"
             android:textColor="@android:color/white"
             android:textStyle="bold"
             tools:text="Math Homework - Chapter 3" />
@@ -43,13 +45,14 @@
             tools:text="Pending" />
 
         <ImageView
-            android:id="@+id/ivView"
+            android:id="@+id/ivDelete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
+            android:padding="4dp"
             app:tint="@color/white"
-            android:src="@drawable/ic_eye" />
+            android:src="@drawable/ic_delete" />
 
         <ImageView
             android:id="@+id/ivEdit"
@@ -57,8 +60,21 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginEnd="16dp"
-            android:layout_toStartOf="@id/ivView"
+            android:layout_toStartOf="@id/ivDelete"
+            android:padding="4dp"
             app:tint="@color/white"
             android:src="@drawable/ic_edit_pencil" />
+
+        <ImageView
+            android:id="@+id/ivDownload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="16dp"
+            android:layout_toStartOf="@id/ivEdit"
+            android:padding="4dp"
+            app:tint="@color/white"
+            android:src="@drawable/ic_download" />
+
     </RelativeLayout>
 </com.google.android.material.card.MaterialCardView>
