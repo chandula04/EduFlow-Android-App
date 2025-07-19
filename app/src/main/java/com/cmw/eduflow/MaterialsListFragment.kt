@@ -31,6 +31,7 @@ class MaterialsListFragment : Fragment() {
 
     private var selectedFileUri: Uri? = null
     private var tvSelectedFileNameInDialog: TextView? = null
+    private lateinit var materialAdapter: CourseMaterialAdapter
 
     private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -52,28 +53,47 @@ class MaterialsListFragment : Fragment() {
         binding.toolbar.title = args.subjectName
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        val adapter = CourseMaterialAdapter()
-        binding.rvMaterials.adapter = adapter
+        setupRecyclerView()
 
         binding.fabAddMaterial.setOnClickListener {
-            showUploadMaterialDialog()
+            showUploadMaterialDialog(null) // Pass null for creating new material
         }
 
         FirebaseFirestore.getInstance().collection("materials")
             .whereEqualTo("subjectId", args.subjectId)
             .orderBy("uploadedAt", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, _ ->
-                adapter.submitList(snapshots?.toObjects(CourseMaterial::class.java))
+                val materials = snapshots?.toObjects(CourseMaterial::class.java)
+                materialAdapter.submitList(materials)
             }
     }
 
-    private fun showUploadMaterialDialog() {
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_upload_material, null)
+    private fun setupRecyclerView() {
+        materialAdapter = CourseMaterialAdapter(
+            onEditClick = { material ->
+                showUploadMaterialDialog(material) // Reuse dialog for editing
+            },
+            onDeleteClick = { material ->
+                showDeleteMaterialDialog(material)
+            }
+        )
+        binding.rvMaterials.adapter = materialAdapter
+    }
 
-        // Find the views using the 'dialogView' we just inflated
+    private fun showUploadMaterialDialog(materialToEdit: CourseMaterial?) {
+        val isEditing = materialToEdit != null
+        selectedFileUri = null // Reset previous selection
+
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_upload_material, null)
         val etLessonTitle = dialogView.findViewById<EditText>(R.id.etLessonTitle)
         val btnSelectFile = dialogView.findViewById<Button>(R.id.btnSelectFile)
         tvSelectedFileNameInDialog = dialogView.findViewById(R.id.tvSelectedFile)
+
+        if (isEditing) {
+            etLessonTitle.setText(materialToEdit?.lessonTitle)
+            btnSelectFile.visibility = View.GONE // Can't change file when editing title
+            tvSelectedFileNameInDialog?.visibility = View.GONE
+        }
 
         btnSelectFile.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply { type = "*/*" }
@@ -81,14 +101,25 @@ class MaterialsListFragment : Fragment() {
         }
 
         AlertDialog.Builder(requireContext())
-            .setTitle("Upload New Material")
+            .setTitle(if (isEditing) "Edit Material" else "Upload New Material")
             .setView(dialogView)
-            .setPositiveButton("Upload") { _, _ ->
+            .setPositiveButton(if (isEditing) "Update" else "Upload") { _, _ ->
                 val title = etLessonTitle.text.toString().trim()
-                if (title.isNotEmpty() && selectedFileUri != null) {
-                    uploadFileToCloudinary(title, selectedFileUri!!)
+                if (title.isNotEmpty()) {
+                    if (isEditing) {
+                        // Just update the title in Firestore
+                        FirebaseFirestore.getInstance().collection("materials").document(materialToEdit!!.id)
+                            .update("lessonTitle", title)
+                            .addOnSuccessListener { Toast.makeText(context, "Material updated!", Toast.LENGTH_SHORT).show() }
+                    } else {
+                        if (selectedFileUri != null) {
+                            uploadFileToCloudinary(title, selectedFileUri!!)
+                        } else {
+                            Toast.makeText(context, "Please select a file.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 } else {
-                    Toast.makeText(context, "Please enter a title and select a file.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Please enter a title.", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancel", null)
@@ -118,13 +149,24 @@ class MaterialsListFragment : Fragment() {
             id = materialId,
             lessonTitle = lessonTitle,
             fileUrl = fileUrl,
-            fileType = fileType,
+            fileType = if (fileType == "raw") "pdf" else fileType, // Cloudinary calls PDFs "raw"
             subjectId = args.subjectId,
             uploadedAt = Timestamp.now()
         )
 
         db.collection("materials").document(materialId).set(material)
             .addOnSuccessListener { Toast.makeText(context, "Material uploaded!", Toast.LENGTH_SHORT).show() }
+    }
+
+    private fun showDeleteMaterialDialog(material: CourseMaterial) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Material")
+            .setMessage("Are you sure you want to delete '${material.lessonTitle}'?")
+            .setPositiveButton("Delete") { _, _ ->
+                FirebaseFirestore.getInstance().collection("materials").document(material.id).delete()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     override fun onDestroyView() {

@@ -18,12 +18,14 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.cmw.eduflow.databinding.FragmentTeacherDashboardBinding
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.storage.FirebaseStorage
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import java.util.*
@@ -35,7 +37,6 @@ class TeacherDashboardFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
-    private lateinit var storage: FirebaseStorage
 
     private lateinit var assignmentAdapter: AssignmentAdapter
     private lateinit var materialAdapter: CourseMaterialAdapter
@@ -71,7 +72,6 @@ class TeacherDashboardFragment : Fragment() {
 
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
-        storage = FirebaseStorage.getInstance()
 
         setupToolbar()
         setupRecyclerViews()
@@ -91,7 +91,15 @@ class TeacherDashboardFragment : Fragment() {
         )
         binding.rvAssignments.adapter = assignmentAdapter
 
-        materialAdapter = CourseMaterialAdapter()
+        // ✅ FIX: Provide the click handlers for the CourseMaterialAdapter
+        materialAdapter = CourseMaterialAdapter(
+            onEditClick = { material ->
+                Toast.makeText(context, "Edit material: ${material.lessonTitle}", Toast.LENGTH_SHORT).show()
+            },
+            onDeleteClick = { material ->
+                Toast.makeText(context, "Delete material: ${material.lessonTitle}", Toast.LENGTH_SHORT).show()
+            }
+        )
         binding.rvCourseMaterials.adapter = materialAdapter
     }
 
@@ -100,16 +108,11 @@ class TeacherDashboardFragment : Fragment() {
         db.collection("assignments")
             .orderBy("dueDate", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, e ->
-                if (e != null) {
-                    setLoading(false)
-                    return@addSnapshotListener
-                }
+                setLoading(false)
+                if (e != null) { return@addSnapshotListener }
                 val assignments = snapshots?.toObjects(Assignment::class.java)
                 assignmentAdapter.submitList(assignments)
-                setLoading(false)
             }
-
-        // You can add another snapshot listener for materials here
     }
 
     private fun showCreateAssignmentDialog(assignmentToEdit: Assignment? = null) {
@@ -122,7 +125,6 @@ class TeacherDashboardFragment : Fragment() {
         val isEditing = assignmentToEdit != null
         if (isEditing) {
             etTitle.setText(assignmentToEdit?.title)
-            // PDF selection is disabled during edit for simplicity
             btnSelectPdf.visibility = View.GONE
             tvSelectedFileNameInDialog?.visibility = View.GONE
         }
@@ -145,9 +147,9 @@ class TeacherDashboardFragment : Fragment() {
                             .addOnSuccessListener { Toast.makeText(context, "Assignment updated!", Toast.LENGTH_SHORT).show() }
                     } else {
                         if (selectedPdfUri != null) {
-                            uploadPdfToFirebaseStorage(title, selectedPdfUri!!, Timestamp(selectedDueDate.time))
+                            uploadPdfToCloudinaryAndSave(title, selectedPdfUri!!, Timestamp(selectedDueDate.time))
                         } else {
-                            Toast.makeText(context, "Please select a PDF file.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Please select a PDF.", Toast.LENGTH_SHORT).show()
                         }
                     }
                 } else {
@@ -158,21 +160,24 @@ class TeacherDashboardFragment : Fragment() {
             .show()
     }
 
-    private fun uploadPdfToFirebaseStorage(title: String, pdfUri: Uri, dueDate: Timestamp) {
+    private fun uploadPdfToCloudinaryAndSave(title: String, pdfUri: Uri, dueDate: Timestamp) {
         setLoading(true)
-        val fileName = "assignments/${System.currentTimeMillis()}.pdf"
-        val storageRef = storage.reference.child(fileName)
-
-        storageRef.putFile(pdfUri)
-            .addOnSuccessListener {
-                storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                    saveAssignmentToFirestore(title, downloadUrl.toString(), dueDate)
+        MediaManager.get().upload(pdfUri)
+            .option("resource_type", "auto")
+            .unsigned("eduflow_unsigned")
+            .callback(object : UploadCallback {
+                override fun onSuccess(requestId: String, resultData: Map<*, *>) {
+                    val fileUrl = resultData["secure_url"].toString()
+                    saveAssignmentToFirestore(title, fileUrl, dueDate)
                 }
-            }
-            .addOnFailureListener { e ->
-                setLoading(false)
-                Toast.makeText(context, "PDF Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
+                override fun onError(requestId: String, error: ErrorInfo) {
+                    setLoading(false)
+                    Toast.makeText(context, "Upload Error: ${error.description}", Toast.LENGTH_LONG).show()
+                }
+                override fun onStart(requestId: String) {}
+                override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {}
+                override fun onReschedule(requestId: String, error: ErrorInfo) {}
+            }).dispatch()
     }
 
     private fun saveAssignmentToFirestore(title: String, fileUrl: String, dueDate: Timestamp) {
@@ -196,17 +201,6 @@ class TeacherDashboardFragment : Fragment() {
             }
     }
 
-    private fun showDeleteConfirmationDialog(assignment: Assignment) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Delete Assignment")
-            .setMessage("Are you sure you want to delete '${assignment.title}'?")
-            .setPositiveButton("Delete") { _, _ ->
-                db.collection("assignments").document(assignment.id).delete()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
     private fun showDatePickerDialog(tvDueDate: TextView) {
         val c = Calendar.getInstance()
         val year = c.get(Calendar.YEAR)
@@ -216,6 +210,17 @@ class TeacherDashboardFragment : Fragment() {
             selectedDueDate.set(y, m, d)
             tvDueDate.text = "Due: $d/${m + 1}/$y"
         }, year, month, day).show()
+    }
+
+    private fun showDeleteConfirmationDialog(assignment: Assignment) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Assignment")
+            .setMessage("Are you sure you want to delete '${assignment.title}'?")
+            .setPositiveButton("Delete") { _, _ ->
+                db.collection("assignments").document(assignment.id).delete()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun launchScanner() {

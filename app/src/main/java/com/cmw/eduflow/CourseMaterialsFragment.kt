@@ -10,7 +10,7 @@ import com.cmw.eduflow.databinding.FragmentCourseMaterialsBinding
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
-class CourseMaterialsFragment : Fragment() {
+class CourseMaterialFragment : Fragment() {
 
     private var _binding: FragmentCourseMaterialsBinding? = null
     private val binding get() = _binding!!
@@ -25,13 +25,13 @@ class CourseMaterialsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        materialAdapter = CourseMaterialAdapter()
-        binding.rvMaterials.adapter = materialAdapter
+        setupRecyclerView()
 
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
 
+        // Fetch and display the materials from Firestore
         FirebaseFirestore.getInstance().collection("materials")
             .orderBy("uploadedAt", Query.Direction.DESCENDING)
             .get()
@@ -39,6 +39,19 @@ class CourseMaterialsFragment : Fragment() {
                 val materials = result.toObjects(CourseMaterial::class.java)
                 materialAdapter.submitList(materials)
             }
+    }
+
+    private fun setupRecyclerView() {
+        // ✅ FIX: Provide empty actions for edit and delete, as students do not use them.
+        materialAdapter = CourseMaterialAdapter(
+            onEditClick = {
+                // Students can't edit, so this does nothing.
+            },
+            onDeleteClick = {
+                // Students can't delete, so this does nothing.
+            }
+        )
+        binding.rvMaterials.adapter = materialAdapter
     }
 
     override fun onDestroyView() {

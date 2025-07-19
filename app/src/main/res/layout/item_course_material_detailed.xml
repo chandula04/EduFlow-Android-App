@@ -20,13 +20,14 @@
             android:layout_height="40dp"
             android:layout_centerVertical="true"
             app:tint="@color/white"
-            android:src="@drawable/ic_file_pdf" />
+            tools:src="@drawable/ic_file_pdf" />
 
         <TextView
             android:id="@+id/tvMaterialTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:layout_toStartOf="@+id/ivDownload"
             android:layout_toEndOf="@id/ivFileType"
             android:textColor="@android:color/white"
             android:textStyle="bold"
@@ -42,13 +43,25 @@
             tools:text="Oct 01, 2023" />
 
         <ImageView
-            android:id="@+id/ivView"
+            android:id="@+id/ivDelete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
+            android:padding="4dp"
             app:tint="@color/white"
-            android:src="@drawable/ic_eye" />
+            android:src="@drawable/ic_delete" />
+
+        <ImageView
+            android:id="@+id/ivEdit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="16dp"
+            android:layout_toStartOf="@id/ivDelete"
+            android:padding="4dp"
+            app:tint="@color/white"
+            android:src="@drawable/ic_edit_pencil" />
 
         <ImageView
             android:id="@+id/ivDownload"
@@ -56,8 +69,8 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginEnd="16dp"
-            android:layout_toStartOf="@id/ivView"
-            app:tint="@color/white"
-            android:src="@drawable/ic_download" />
+            android:layout_toStartOf="@id/ivEdit"
+            android:src="@drawable/ic_download"
+            app:tint="@color/white" />
     </RelativeLayout>
 </com.google.android.material.card.MaterialCardView>

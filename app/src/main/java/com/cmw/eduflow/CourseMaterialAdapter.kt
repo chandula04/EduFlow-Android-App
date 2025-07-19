@@ -11,35 +11,44 @@ import com.cmw.eduflow.databinding.ItemCourseMaterialDetailedBinding
 import java.text.SimpleDateFormat
 import java.util.*
 
-class CourseMaterialAdapter : ListAdapter<CourseMaterial, CourseMaterialAdapter.MaterialViewHolder>(DiffCallback()) {
+class CourseMaterialAdapter(
+    private val onEditClick: (CourseMaterial) -> Unit,
+    private val onDeleteClick: (CourseMaterial) -> Unit
+) : ListAdapter<CourseMaterial, CourseMaterialAdapter.MaterialViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MaterialViewHolder {
         val binding = ItemCourseMaterialDetailedBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return MaterialViewHolder(binding)
+        return MaterialViewHolder(binding, onEditClick, onDeleteClick)
     }
 
     override fun onBindViewHolder(holder: MaterialViewHolder, position: Int) {
-        val material = getItem(position)
-        holder.bind(material)
+        holder.bind(getItem(position))
     }
 
-    class MaterialViewHolder(private val binding: ItemCourseMaterialDetailedBinding) : RecyclerView.ViewHolder(binding.root) {
+    class MaterialViewHolder(
+        private val binding: ItemCourseMaterialDetailedBinding,
+        private val onEditClick: (CourseMaterial) -> Unit,
+        private val onDeleteClick: (CourseMaterial) -> Unit
+    ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(material: CourseMaterial) {
             binding.tvMaterialTitle.text = material.lessonTitle
             val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
             binding.tvUploadDate.text = sdf.format(material.uploadedAt.toDate())
 
-            // Change icon based on a pseudo file type check
-            if (material.fileUrl.contains(".pdf")) {
-                binding.ivFileType.setImageResource(R.drawable.ic_file_pdf)
-            } else {
+            if (material.fileType == "video") {
                 binding.ivFileType.setImageResource(R.drawable.ic_file_video)
+            } else {
+                binding.ivFileType.setImageResource(R.drawable.ic_file_pdf)
             }
 
             binding.ivDownload.setOnClickListener {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(material.fileUrl))
                 binding.root.context.startActivity(intent)
             }
+
+            // ✅ SET ONCLICK LISTENERS
+            binding.ivEdit.setOnClickListener { onEditClick(material) }
+            binding.ivDelete.setOnClickListener { onDeleteClick(material) }
         }
     }
 
