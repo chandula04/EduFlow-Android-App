@@ -3,6 +3,7 @@ package com.cmw.eduflow
 import android.content.Intent
 import android.net.Uri
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -12,6 +13,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class CourseMaterialAdapter(
+    private val userRole: String,
     private val onEditClick: (CourseMaterial) -> Unit,
     private val onDeleteClick: (CourseMaterial) -> Unit
 ) : ListAdapter<CourseMaterial, CourseMaterialAdapter.MaterialViewHolder>(DiffCallback()) {
@@ -22,7 +24,7 @@ class CourseMaterialAdapter(
     }
 
     override fun onBindViewHolder(holder: MaterialViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), userRole)
     }
 
     class MaterialViewHolder(
@@ -30,19 +32,28 @@ class CourseMaterialAdapter(
         private val onEditClick: (CourseMaterial) -> Unit,
         private val onDeleteClick: (CourseMaterial) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(material: CourseMaterial) {
+        fun bind(material: CourseMaterial, userRole: String) {
             binding.tvMaterialTitle.text = material.lessonTitle
             binding.tvSubjectName.text = "Subject: ${material.subjectName}"
 
             val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-            // This assumes your CourseMaterial data class has 'uploadedAt'
-            // If not, you can remove or comment out this line.
+            // The line below was commented out in one version, make sure your data class has 'uploadedAt'
+            // If not, you can remove this line.
             // binding.tvUploadDate.text = sdf.format(material.uploadedAt.toDate())
 
             if (material.fileType == "video") {
                 binding.ivFileType.setImageResource(R.drawable.ic_file_video)
             } else {
                 binding.ivFileType.setImageResource(R.drawable.ic_file_pdf)
+            }
+
+            // Show/hide buttons based on role
+            if (userRole == "teacher") {
+                binding.ivEdit.visibility = View.VISIBLE
+                binding.ivDelete.visibility = View.VISIBLE
+            } else {
+                binding.ivEdit.visibility = View.GONE
+                binding.ivDelete.visibility = View.GONE
             }
 
             binding.ivDownload.setOnClickListener {

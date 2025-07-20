@@ -21,6 +21,7 @@ import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
@@ -32,6 +33,7 @@ class MaterialsListFragment : Fragment() {
     private var selectedFileUri: Uri? = null
     private var tvSelectedFileNameInDialog: TextView? = null
     private lateinit var materialAdapter: CourseMaterialAdapter
+    private var currentUserRole: String = "student" // Default to student
 
     private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -53,12 +55,47 @@ class MaterialsListFragment : Fragment() {
         binding.toolbar.title = args.subjectName
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        setupRecyclerView()
+        // We will fetch the role first, then setup the adapter and FAB
+        fetchCurrentUserRole()
+    }
 
+    private fun fetchCurrentUserRole() {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId == null) {
+            setupUIForRole() // Setup with default "student" role if user is somehow null
+            return
+        }
+
+        FirebaseFirestore.getInstance().collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    currentUserRole = document.getString("role") ?: "student"
+                }
+                // Now that we have the role, set up the UI
+                setupUIForRole()
+            }
+            .addOnFailureListener {
+                setupUIForRole() // Setup with default role on failure
+            }
+    }
+
+    private fun setupUIForRole() {
+        // Hide the "Add" button for students
+        if (currentUserRole != "teacher") {
+            binding.fabAddMaterial.visibility = View.GONE
+        }
         binding.fabAddMaterial.setOnClickListener {
             showUploadMaterialDialog(null)
         }
 
+        materialAdapter = CourseMaterialAdapter(
+            userRole = currentUserRole,
+            onEditClick = { material -> showUploadMaterialDialog(material) },
+            onDeleteClick = { material -> showDeleteMaterialDialog(material) }
+        )
+        binding.rvMaterials.adapter = materialAdapter
+
+        // Fetch and display materials
         FirebaseFirestore.getInstance().collection("materials")
             .whereEqualTo("subjectId", args.subjectId)
             .orderBy("uploadedAt", Query.Direction.DESCENDING)
@@ -66,18 +103,6 @@ class MaterialsListFragment : Fragment() {
                 val materials = snapshots?.toObjects(CourseMaterial::class.java)
                 materialAdapter.submitList(materials)
             }
-    }
-
-    private fun setupRecyclerView() {
-        materialAdapter = CourseMaterialAdapter(
-            onEditClick = { material ->
-                showUploadMaterialDialog(material)
-            },
-            onDeleteClick = { material ->
-                showDeleteMaterialDialog(material)
-            }
-        )
-        binding.rvMaterials.adapter = materialAdapter
     }
 
     private fun showUploadMaterialDialog(materialToEdit: CourseMaterial?) {
@@ -126,22 +151,18 @@ class MaterialsListFragment : Fragment() {
     }
 
     private fun uploadFileToCloudinary(lessonTitle: String, fileUri: Uri) {
-        // ✅ CORRECTED UPLOAD LOGIC
         MediaManager.get().upload(fileUri)
             .unsigned("eduflow_unsigned")
-            .option("resource_type", "auto")
             .callback(object: UploadCallback {
                 override fun onSuccess(requestId: String, resultData: Map<*, *>) {
                     val url = resultData["secure_url"].toString()
                     val fileType = resultData["resource_type"].toString()
                     saveMaterialToFirestore(lessonTitle, url, fileType)
                 }
-                override fun onError(requestId: String, error: ErrorInfo) {
-                    Toast.makeText(context, "Upload Error: ${error.description}", Toast.LENGTH_LONG).show()
-                }
-                override fun onStart(requestId: String) {}
-                override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {}
-                override fun onReschedule(requestId: String, error: ErrorInfo) {}
+                override fun onError(requestId: String, error: ErrorInfo) { /* Handle Error */ }
+                override fun onStart(requestId: String) { /* Handle Start */ }
+                override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) { /* Handle Progress */ }
+                override fun onReschedule(requestId: String, error: ErrorInfo) { /* Handle Reschedule */ }
             }).dispatch()
     }
 

@@ -42,7 +42,6 @@ class TeacherDashboardFragment : Fragment() {
     private lateinit var assignmentAdapter: AssignmentAdapter
     private lateinit var materialAdapter: CourseMaterialAdapter
 
-    // State variables for dialogs
     private var selectedFileUri: Uri? = null
     private var selectedDueDate: Calendar = Calendar.getInstance()
     private var tvSelectedFileNameInDialog: TextView? = null
@@ -80,18 +79,20 @@ class TeacherDashboardFragment : Fragment() {
         fetchData()
 
         binding.btnScanQr.setOnClickListener { launchScanner() }
-        binding.tvCreateAssignment.setOnClickListener { showCreateAssignmentDialog(null) }
+        binding.tvCreateAssignment.setOnClickListener { showCreateAssignmentDialog() }
         binding.tvUploadMaterial.setOnClickListener { showUploadMaterialDialog(null) }
     }
 
     private fun setupRecyclerViews() {
         assignmentAdapter = AssignmentAdapter(
+            userRole = "teacher",
             onEditClick = { assignment -> showCreateAssignmentDialog(assignment) },
             onDeleteClick = { assignment -> showDeleteConfirmationDialog(assignment) }
         )
         binding.rvAssignments.adapter = assignmentAdapter
 
         materialAdapter = CourseMaterialAdapter(
+            userRole = "teacher",
             onEditClick = { material -> showUploadMaterialDialog(material) },
             onDeleteClick = { material -> showDeleteMaterialDialog(material) }
         )
@@ -118,10 +119,7 @@ class TeacherDashboardFragment : Fragment() {
             }
     }
 
-    // --- ASSIGNMENT FUNCTIONS ---
-
     private fun showCreateAssignmentDialog(assignmentToEdit: Assignment? = null) {
-        selectedFileUri = null
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_create_assignment, null)
         val etTitle = dialogView.findViewById<TextInputEditText>(R.id.etAssignmentTitle)
         val tvDueDate = dialogView.findViewById<TextView>(R.id.tvDueDate)
@@ -217,9 +215,7 @@ class TeacherDashboardFragment : Fragment() {
             .show()
     }
 
-    // --- MATERIAL FUNCTIONS ---
-
-    private fun showUploadMaterialDialog(materialToEdit: CourseMaterial? = null) {
+    private fun showUploadMaterialDialog(materialToEdit: CourseMaterial?) {
         val isEditing = materialToEdit != null
         selectedFileUri = null
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_upload_material, null)
@@ -308,8 +304,6 @@ class TeacherDashboardFragment : Fragment() {
             .setNegativeButton("Cancel", null)
             .show()
     }
-
-    // --- SHARED HELPER FUNCTIONS ---
 
     private fun showDatePickerDialog(tvDueDate: TextView) {
         val c = Calendar.getInstance()

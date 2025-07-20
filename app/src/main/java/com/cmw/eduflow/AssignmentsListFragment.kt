@@ -24,7 +24,12 @@ class AssignmentsListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        assignmentAdapter = AssignmentAdapter(onEditClick = {}, onDeleteClick = {})
+        // ✅ Tell adapter the user is a student
+        assignmentAdapter = AssignmentAdapter(
+            userRole = "student",
+            onEditClick = { /* Students cannot edit */ },
+            onDeleteClick = { /* Students cannot delete */ }
+        )
         binding.rvAssignments.adapter = assignmentAdapter
 
         FirebaseFirestore.getInstance().collection("assignments")

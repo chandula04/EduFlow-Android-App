@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -16,6 +17,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class AssignmentAdapter(
+    private val userRole: String,
     private val onEditClick: (Assignment) -> Unit,
     private val onDeleteClick: (Assignment) -> Unit
 ) : ListAdapter<Assignment, AssignmentAdapter.AssignmentViewHolder>(DiffCallback()) {
@@ -26,7 +28,7 @@ class AssignmentAdapter(
     }
 
     override fun onBindViewHolder(holder: AssignmentViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), userRole)
     }
 
     class AssignmentViewHolder(
@@ -35,13 +37,13 @@ class AssignmentAdapter(
         private val onDeleteClick: (Assignment) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(assignment: Assignment) {
+        fun bind(assignment: Assignment, userRole: String) {
             binding.tvAssignmentTitle.text = assignment.title
 
             val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
             binding.tvDueDate.text = "Due: ${sdf.format(assignment.dueDate.toDate())}"
 
-            // ✅ DYNAMIC STATUS LOGIC
+            // Dynamic status logic
             var statusText = assignment.status
             var statusColor = Color.parseColor("#FFB800") // Default to Pending color
             var statusBackground = R.drawable.chip_background_pending
@@ -52,20 +54,14 @@ class AssignmentAdapter(
                 statusColor = Color.parseColor("#28A745") // Green
                 statusBackground = R.drawable.chip_background_graded
             } else if (assignment.dueDate.toDate().before(now)) {
-                // It's past the due date
                 val diffInMillis = now.time - assignment.dueDate.toDate().time
                 val diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMillis)
 
-                if (diffInDays > 20) {
-                    statusText = "Overdue"
-                    statusColor = Color.parseColor("#DC3545") // Red
-                    statusBackground = R.drawable.chip_background_overdue
-                } else if (diffInDays in 0..4) { // 0 days means it was due today but is now past time
+                if (diffInDays in 0..4) {
                     statusText = "Late"
                     statusColor = Color.parseColor("#FD7E14") // Orange
                     statusBackground = R.drawable.chip_background_late
                 } else {
-                    // This handles cases where it's 5-20 days late
                     statusText = "Overdue"
                     statusColor = Color.parseColor("#DC3545") // Red
                     statusBackground = R.drawable.chip_background_overdue
@@ -76,6 +72,16 @@ class AssignmentAdapter(
             binding.tvStatus.setTextColor(statusColor)
             binding.tvStatus.background = ContextCompat.getDrawable(binding.root.context, statusBackground)
 
+            // Show/hide buttons based on role
+            if (userRole == "teacher") {
+                binding.ivEdit.visibility = View.VISIBLE
+                binding.ivDelete.visibility = View.VISIBLE
+            } else {
+                binding.ivEdit.visibility = View.GONE
+                binding.ivDelete.visibility = View.GONE
+            }
+
+            // Set click listeners
             binding.ivEdit.setOnClickListener { onEditClick(assignment) }
             binding.ivDelete.setOnClickListener { onDeleteClick(assignment) }
 
