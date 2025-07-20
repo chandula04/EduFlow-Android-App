@@ -14,6 +14,7 @@ import androidx.navigation.fragment.findNavController
 import com.cmw.eduflow.databinding.FragmentStudentDashboardBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 
@@ -24,11 +25,9 @@ class StudentDashboardFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
+    private lateinit var subjectsAdapter: SubjectsAdapter
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentStudentDashboardBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -40,6 +39,8 @@ class StudentDashboardFragment : Fragment() {
         db = FirebaseFirestore.getInstance()
 
         setupToolbar()
+        setupRecyclerView()
+        fetchData()
         setupClickListeners()
     }
 
@@ -62,6 +63,28 @@ class StudentDashboardFragment : Fragment() {
         }
     }
 
+    private fun setupRecyclerView() {
+        subjectsAdapter = SubjectsAdapter(
+            onItemClick = { subject ->
+                // When a student clicks a subject, navigate to the materials list for that subject
+                val action = StudentDashboardFragmentDirections.actionStudentDashboardFragmentToMaterialsListFragment(subject.id, subject.name)
+                findNavController().navigate(action)
+            },
+            onEditClick = { /* Students cannot edit */ },
+            onDeleteClick = { /* Students cannot delete */ }
+        )
+        binding.rvSubjects.adapter = subjectsAdapter
+    }
+
+    private fun fetchData() {
+        db.collection("subjects")
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) { return@addSnapshotListener }
+                val subjects = snapshots?.toObjects(Subject::class.java)
+                subjectsAdapter.submitList(subjects)
+            }
+    }
+
     private fun setupClickListeners() {
         binding.btnGenerateQr.setOnClickListener {
             generateAndShowQrCode()
@@ -71,9 +94,19 @@ class StudentDashboardFragment : Fragment() {
             findNavController().navigate(R.id.action_studentDashboardFragment_to_assignmentsListFragment)
         }
 
-        binding.cardViewMaterials.setOnClickListener {
-            findNavController().navigate(R.id.action_studentDashboardFragment_to_subjectsFragment)
+        binding.cardViewResults.setOnClickListener {
+            showResultsDialog()
         }
+    }
+
+    private fun showResultsDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Results")
+            .setMessage("The results feature is coming soon!")
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     private fun generateAndShowQrCode() {
@@ -82,22 +115,15 @@ class StudentDashboardFragment : Fragment() {
             Toast.makeText(context, "Could not generate QR Code. Please log in again.", Toast.LENGTH_SHORT).show()
             return
         }
-
         try {
             val barcodeEncoder = BarcodeEncoder()
             val bitmap: Bitmap = barcodeEncoder.encodeBitmap(studentId, BarcodeFormat.QR_CODE, 400, 400)
-
-            val imageView = ImageView(requireContext())
-            imageView.setImageBitmap(bitmap)
-
+            val imageView = ImageView(requireContext()).apply { setImageBitmap(bitmap) }
             AlertDialog.Builder(requireContext())
                 .setTitle("Your Attendance QR Code")
                 .setView(imageView)
-                .setPositiveButton("Close") { dialog, _ ->
-                    dialog.dismiss()
-                }
+                .setPositiveButton("Close") { dialog, _ -> dialog.dismiss() }
                 .show()
-
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(context, "Error generating QR Code.", Toast.LENGTH_SHORT).show()
