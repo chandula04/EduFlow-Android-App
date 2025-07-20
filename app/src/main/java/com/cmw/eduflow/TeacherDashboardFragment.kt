@@ -91,13 +91,13 @@ class TeacherDashboardFragment : Fragment() {
         )
         binding.rvAssignments.adapter = assignmentAdapter
 
-        // ✅ FIX: Provide the click handlers for the CourseMaterialAdapter
+        // ✅ FIX: Provided the missing click handlers for the CourseMaterialAdapter
         materialAdapter = CourseMaterialAdapter(
             onEditClick = { material ->
-                Toast.makeText(context, "Edit material: ${material.lessonTitle}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Edit for ${material.lessonTitle} coming soon.", Toast.LENGTH_SHORT).show()
             },
             onDeleteClick = { material ->
-                Toast.makeText(context, "Delete material: ${material.lessonTitle}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Delete for ${material.lessonTitle} coming soon.", Toast.LENGTH_SHORT).show()
             }
         )
         binding.rvCourseMaterials.adapter = materialAdapter
@@ -108,10 +108,13 @@ class TeacherDashboardFragment : Fragment() {
         db.collection("assignments")
             .orderBy("dueDate", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, e ->
-                setLoading(false)
-                if (e != null) { return@addSnapshotListener }
+                if (e != null) {
+                    setLoading(false)
+                    return@addSnapshotListener
+                }
                 val assignments = snapshots?.toObjects(Assignment::class.java)
                 assignmentAdapter.submitList(assignments)
+                setLoading(false)
             }
     }
 
@@ -164,7 +167,7 @@ class TeacherDashboardFragment : Fragment() {
         setLoading(true)
         MediaManager.get().upload(pdfUri)
             .option("resource_type", "auto")
-            .unsigned("eduflow_unsigned")
+            .unsigned("eduflow_unsigned") // Your preset name
             .callback(object : UploadCallback {
                 override fun onSuccess(requestId: String, resultData: Map<*, *>) {
                     val fileUrl = resultData["secure_url"].toString()

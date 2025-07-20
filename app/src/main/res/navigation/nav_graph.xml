@@ -116,12 +116,6 @@
     </fragment>
 
     <fragment
-        android:id="@+id/courseMaterialsFragment"
-        android:name="com.cmw.eduflow.CourseMaterialsFragment"
-        android:label="Course Materials"
-        tools:layout="@layout/fragment_course_materials" />
-
-    <fragment
         android:id="@+id/subjectsFragment"
         android:name="com.cmw.eduflow.SubjectsFragment"
         android:label="Subjects"
@@ -143,6 +137,12 @@
             android:name="subjectName"
             app:argType="string" />
     </fragment>
+
+    <fragment
+        android:id="@+id/courseMaterialsFragment"
+        android:name="com.cmw.eduflow.CourseMaterialsFragment"
+        android:label="Course Materials"
+        tools:layout="@layout/fragment_course_materials" />
 
     <fragment
         android:id="@+id/assignmentsListFragment"

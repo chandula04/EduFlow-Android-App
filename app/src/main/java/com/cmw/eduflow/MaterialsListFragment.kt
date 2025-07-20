@@ -56,7 +56,7 @@ class MaterialsListFragment : Fragment() {
         setupRecyclerView()
 
         binding.fabAddMaterial.setOnClickListener {
-            showUploadMaterialDialog(null) // Pass null for creating new material
+            showUploadMaterialDialog(null)
         }
 
         FirebaseFirestore.getInstance().collection("materials")
@@ -71,7 +71,7 @@ class MaterialsListFragment : Fragment() {
     private fun setupRecyclerView() {
         materialAdapter = CourseMaterialAdapter(
             onEditClick = { material ->
-                showUploadMaterialDialog(material) // Reuse dialog for editing
+                showUploadMaterialDialog(material)
             },
             onDeleteClick = { material ->
                 showDeleteMaterialDialog(material)
@@ -82,7 +82,7 @@ class MaterialsListFragment : Fragment() {
 
     private fun showUploadMaterialDialog(materialToEdit: CourseMaterial?) {
         val isEditing = materialToEdit != null
-        selectedFileUri = null // Reset previous selection
+        selectedFileUri = null
 
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_upload_material, null)
         val etLessonTitle = dialogView.findViewById<EditText>(R.id.etLessonTitle)
@@ -91,7 +91,7 @@ class MaterialsListFragment : Fragment() {
 
         if (isEditing) {
             etLessonTitle.setText(materialToEdit?.lessonTitle)
-            btnSelectFile.visibility = View.GONE // Can't change file when editing title
+            btnSelectFile.visibility = View.GONE
             tvSelectedFileNameInDialog?.visibility = View.GONE
         }
 
@@ -101,13 +101,12 @@ class MaterialsListFragment : Fragment() {
         }
 
         AlertDialog.Builder(requireContext())
-            .setTitle(if (isEditing) "Edit Material" else "Upload New Material")
+            .setTitle(if (isEditing) "Edit Material Title" else "Upload New Material")
             .setView(dialogView)
             .setPositiveButton(if (isEditing) "Update" else "Upload") { _, _ ->
                 val title = etLessonTitle.text.toString().trim()
                 if (title.isNotEmpty()) {
                     if (isEditing) {
-                        // Just update the title in Firestore
                         FirebaseFirestore.getInstance().collection("materials").document(materialToEdit!!.id)
                             .update("lessonTitle", title)
                             .addOnSuccessListener { Toast.makeText(context, "Material updated!", Toast.LENGTH_SHORT).show() }
@@ -127,18 +126,22 @@ class MaterialsListFragment : Fragment() {
     }
 
     private fun uploadFileToCloudinary(lessonTitle: String, fileUri: Uri) {
+        // ✅ CORRECTED UPLOAD LOGIC
         MediaManager.get().upload(fileUri)
             .unsigned("eduflow_unsigned")
+            .option("resource_type", "auto")
             .callback(object: UploadCallback {
                 override fun onSuccess(requestId: String, resultData: Map<*, *>) {
                     val url = resultData["secure_url"].toString()
                     val fileType = resultData["resource_type"].toString()
                     saveMaterialToFirestore(lessonTitle, url, fileType)
                 }
-                override fun onError(requestId: String, error: ErrorInfo) { /* Handle Error */ }
-                override fun onStart(requestId: String) { /* Handle Start */ }
-                override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) { /* Handle Progress */ }
-                override fun onReschedule(requestId: String, error: ErrorInfo) { /* Handle Reschedule */ }
+                override fun onError(requestId: String, error: ErrorInfo) {
+                    Toast.makeText(context, "Upload Error: ${error.description}", Toast.LENGTH_LONG).show()
+                }
+                override fun onStart(requestId: String) {}
+                override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {}
+                override fun onReschedule(requestId: String, error: ErrorInfo) {}
             }).dispatch()
     }
 
@@ -149,7 +152,7 @@ class MaterialsListFragment : Fragment() {
             id = materialId,
             lessonTitle = lessonTitle,
             fileUrl = fileUrl,
-            fileType = if (fileType == "raw") "pdf" else fileType, // Cloudinary calls PDFs "raw"
+            fileType = if (fileType == "raw") "pdf" else fileType,
             subjectId = args.subjectId,
             uploadedAt = Timestamp.now()
         )
