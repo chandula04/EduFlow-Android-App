@@ -153,7 +153,7 @@ class MaterialsListFragment : Fragment() {
             lessonTitle = lessonTitle,
             fileUrl = fileUrl,
             fileType = if (fileType == "raw") "pdf" else fileType,
-            subjectId = args.subjectId,
+            subjectName = args.subjectName,
             uploadedAt = Timestamp.now()
         )
 

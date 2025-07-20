@@ -127,7 +127,7 @@
                     android:id="@+id/tvUploadMaterial"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Add Subject >"
+                    android:text="Add Lesson >"
                     android:textColor="#F47C7C"
                     android:layout_alignParentEnd="true"
                     android:padding="4dp"/>

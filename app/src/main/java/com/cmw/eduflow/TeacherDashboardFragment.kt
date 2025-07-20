@@ -94,7 +94,6 @@ class TeacherDashboardFragment : Fragment() {
 
         subjectsAdapter = SubjectsAdapter(
             onItemClick = { subject ->
-                // ✅ FIX: Navigate using the action ID and a Bundle
                 val bundle = Bundle().apply {
                     putString("subjectId", subject.id)
                     putString("subjectName", subject.name)
