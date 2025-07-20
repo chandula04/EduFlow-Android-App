@@ -42,6 +42,7 @@ class TeacherDashboardFragment : Fragment() {
     private lateinit var assignmentAdapter: AssignmentAdapter
     private lateinit var materialAdapter: CourseMaterialAdapter
 
+    // State variables for dialogs
     private var selectedFileUri: Uri? = null
     private var selectedDueDate: Calendar = Calendar.getInstance()
     private var tvSelectedFileNameInDialog: TextView? = null
@@ -79,7 +80,7 @@ class TeacherDashboardFragment : Fragment() {
         fetchData()
 
         binding.btnScanQr.setOnClickListener { launchScanner() }
-        binding.tvCreateAssignment.setOnClickListener { showCreateAssignmentDialog() }
+        binding.tvCreateAssignment.setOnClickListener { showCreateAssignmentDialog(null) }
         binding.tvUploadMaterial.setOnClickListener { showUploadMaterialDialog(null) }
     }
 
@@ -117,23 +118,108 @@ class TeacherDashboardFragment : Fragment() {
             }
     }
 
+    // --- ASSIGNMENT FUNCTIONS ---
+
     private fun showCreateAssignmentDialog(assignmentToEdit: Assignment? = null) {
-        // This function is for assignments and remains unchanged
+        selectedFileUri = null
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_create_assignment, null)
+        val etTitle = dialogView.findViewById<TextInputEditText>(R.id.etAssignmentTitle)
+        val tvDueDate = dialogView.findViewById<TextView>(R.id.tvDueDate)
+        val btnSelectPdf = dialogView.findViewById<Button>(R.id.btnSelectPdf)
+        tvSelectedFileNameInDialog = dialogView.findViewById(R.id.tvSelectedFile)
+
+        val isEditing = assignmentToEdit != null
+        if (isEditing) {
+            etTitle.setText(assignmentToEdit?.title)
+            btnSelectPdf.visibility = View.GONE
+            tvSelectedFileNameInDialog?.visibility = View.GONE
+        }
+
+        tvDueDate.setOnClickListener { showDatePickerDialog(tvDueDate) }
+        btnSelectPdf.setOnClickListener {
+            val intent = Intent(Intent.ACTION_GET_CONTENT).apply { type = "application/pdf" }
+            filePickerLauncher.launch(intent)
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setTitle(if (isEditing) "Edit Assignment" else "Create Assignment")
+            .setPositiveButton(if (isEditing) "Update" else "Create") { _, _ ->
+                val title = etTitle.text.toString().trim()
+                if (title.isNotEmpty()) {
+                    if (isEditing) {
+                        val updatedData = mapOf("title" to title, "dueDate" to Timestamp(selectedDueDate.time))
+                        db.collection("assignments").document(assignmentToEdit!!.id).update(updatedData)
+                            .addOnSuccessListener { Toast.makeText(context, "Assignment updated!", Toast.LENGTH_SHORT).show() }
+                    } else {
+                        if (selectedFileUri != null) {
+                            uploadPdfToCloudinaryAndSave(title, selectedFileUri!!, Timestamp(selectedDueDate.time))
+                        } else {
+                            Toast.makeText(context, "Please select a PDF.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    Toast.makeText(context, "Please enter a title.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun uploadPdfToCloudinaryAndSave(title: String, pdfUri: Uri, dueDate: Timestamp) {
-        // This function is for assignments and remains unchanged
+        setLoading(true)
+        MediaManager.get().upload(pdfUri)
+            .option("resource_type", "auto")
+            .unsigned("eduflow_unsigned")
+            .callback(object : UploadCallback {
+                override fun onSuccess(requestId: String, resultData: Map<*, *>) {
+                    val fileUrl = resultData["secure_url"].toString()
+                    saveAssignmentToFirestore(title, fileUrl, dueDate)
+                }
+                override fun onError(requestId: String, error: ErrorInfo) {
+                    setLoading(false)
+                    Toast.makeText(context, "Upload Error: ${error.description}", Toast.LENGTH_LONG).show()
+                }
+                override fun onStart(requestId: String) {}
+                override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {}
+                override fun onReschedule(requestId: String, error: ErrorInfo) {}
+            }).dispatch()
     }
 
     private fun saveAssignmentToFirestore(title: String, fileUrl: String, dueDate: Timestamp) {
-        // This function is for assignments and remains unchanged
+        val assignmentId = db.collection("assignments").document().id
+        val newAssignment = Assignment(
+            id = assignmentId,
+            title = title,
+            dueDate = dueDate,
+            status = "Pending",
+            fileUrl = fileUrl
+        )
+        db.collection("assignments").document(assignmentId).set(newAssignment)
+            .addOnSuccessListener {
+                setLoading(false)
+                Toast.makeText(context, "Assignment created successfully!", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                setLoading(false)
+                Toast.makeText(context, "Failed to create assignment: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun showDeleteConfirmationDialog(assignment: Assignment) {
-        // This function is for assignments and remains unchanged
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Assignment")
+            .setMessage("Are you sure you want to delete '${assignment.title}'?")
+            .setPositiveButton("Delete") { _, _ ->
+                db.collection("assignments").document(assignment.id).delete()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
-    private fun showUploadMaterialDialog(materialToEdit: CourseMaterial?) {
+    // --- MATERIAL FUNCTIONS ---
+
+    private fun showUploadMaterialDialog(materialToEdit: CourseMaterial? = null) {
         val isEditing = materialToEdit != null
         selectedFileUri = null
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_upload_material, null)
@@ -222,6 +308,8 @@ class TeacherDashboardFragment : Fragment() {
             .setNegativeButton("Cancel", null)
             .show()
     }
+
+    // --- SHARED HELPER FUNCTIONS ---
 
     private fun showDatePickerDialog(tvDueDate: TextView) {
         val c = Calendar.getInstance()
