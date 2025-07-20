@@ -100,6 +100,9 @@
         <action
             android:id="@+id/action_teacherDashboardFragment_to_subjectsFragment"
             app:destination="@id/subjectsFragment" />
+        <action
+            android:id="@+id/action_teacherDashboardFragment_to_materialsListFragment"
+            app:destination="@id/materialsListFragment" />
     </fragment>
 
     <fragment
@@ -111,8 +114,8 @@
             android:id="@+id/action_studentDashboardFragment_to_assignmentsListFragment"
             app:destination="@id/assignmentsListFragment" />
         <action
-            android:id="@+id/action_studentDashboardFragment_to_courseMaterialsFragment"
-            app:destination="@id/courseMaterialsFragment" />
+            android:id="@+id/action_studentDashboardFragment_to_subjectsFragment"
+            app:destination="@id/subjectsFragment" />
     </fragment>
 
     <fragment
@@ -137,12 +140,6 @@
             android:name="subjectName"
             app:argType="string" />
     </fragment>
-
-    <fragment
-        android:id="@+id/courseMaterialsFragment"
-        android:name="com.cmw.eduflow.CourseMaterialsFragment"
-        android:label="Course Materials"
-        tools:layout="@layout/fragment_course_materials" />
 
     <fragment
         android:id="@+id/assignmentsListFragment"

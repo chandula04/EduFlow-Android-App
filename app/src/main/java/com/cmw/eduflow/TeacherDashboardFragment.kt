@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,7 +40,7 @@ class TeacherDashboardFragment : Fragment() {
     private lateinit var db: FirebaseFirestore
 
     private lateinit var assignmentAdapter: AssignmentAdapter
-    private lateinit var materialAdapter: CourseMaterialAdapter
+    private lateinit var subjectsAdapter: SubjectsAdapter
 
     private var selectedPdfUri: Uri? = null
     private var selectedDueDate: Calendar = Calendar.getInstance()
@@ -80,7 +81,7 @@ class TeacherDashboardFragment : Fragment() {
         binding.btnScanQr.setOnClickListener { launchScanner() }
         binding.tvCreateAssignment.setOnClickListener { showCreateAssignmentDialog() }
         binding.tvUploadMaterial.setOnClickListener {
-            findNavController().navigate(R.id.action_teacherDashboardFragment_to_subjectsFragment)
+            showSubjectDialog(null)
         }
     }
 
@@ -91,16 +92,19 @@ class TeacherDashboardFragment : Fragment() {
         )
         binding.rvAssignments.adapter = assignmentAdapter
 
-        // ✅ FIX: Provided the missing click handlers for the CourseMaterialAdapter
-        materialAdapter = CourseMaterialAdapter(
-            onEditClick = { material ->
-                Toast.makeText(context, "Edit for ${material.lessonTitle} coming soon.", Toast.LENGTH_SHORT).show()
+        subjectsAdapter = SubjectsAdapter(
+            onItemClick = { subject ->
+                // ✅ FIX: Navigate using the action ID and a Bundle
+                val bundle = Bundle().apply {
+                    putString("subjectId", subject.id)
+                    putString("subjectName", subject.name)
+                }
+                findNavController().navigate(R.id.action_teacherDashboardFragment_to_materialsListFragment, bundle)
             },
-            onDeleteClick = { material ->
-                Toast.makeText(context, "Delete for ${material.lessonTitle} coming soon.", Toast.LENGTH_SHORT).show()
-            }
+            onEditClick = { subject -> showSubjectDialog(subject) },
+            onDeleteClick = { subject -> deleteSubject(subject) }
         )
-        binding.rvCourseMaterials.adapter = materialAdapter
+        binding.rvCourseMaterials.adapter = subjectsAdapter
     }
 
     private fun fetchData() {
@@ -108,13 +112,17 @@ class TeacherDashboardFragment : Fragment() {
         db.collection("assignments")
             .orderBy("dueDate", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, e ->
-                if (e != null) {
-                    setLoading(false)
-                    return@addSnapshotListener
-                }
+                if (e != null) { return@addSnapshotListener }
                 val assignments = snapshots?.toObjects(Assignment::class.java)
                 assignmentAdapter.submitList(assignments)
+            }
+
+        db.collection("subjects")
+            .addSnapshotListener { snapshots, e ->
                 setLoading(false)
+                if (e != null) { return@addSnapshotListener }
+                val subjects = snapshots?.toObjects(Subject::class.java)
+                subjectsAdapter.submitList(subjects)
             }
     }
 
@@ -167,7 +175,7 @@ class TeacherDashboardFragment : Fragment() {
         setLoading(true)
         MediaManager.get().upload(pdfUri)
             .option("resource_type", "auto")
-            .unsigned("eduflow_unsigned") // Your preset name
+            .unsigned("eduflow_unsigned")
             .callback(object : UploadCallback {
                 override fun onSuccess(requestId: String, resultData: Map<*, *>) {
                     val fileUrl = resultData["secure_url"].toString()
@@ -221,6 +229,43 @@ class TeacherDashboardFragment : Fragment() {
             .setMessage("Are you sure you want to delete '${assignment.title}'?")
             .setPositiveButton("Delete") { _, _ ->
                 db.collection("assignments").document(assignment.id).delete()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showSubjectDialog(subjectToEdit: Subject?) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_add_subject, null)
+        val etSubjectName = dialogView.findViewById<EditText>(R.id.etSubjectName)
+        if (subjectToEdit != null) {
+            etSubjectName.setText(subjectToEdit.name)
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle(if (subjectToEdit != null) "Edit Subject" else "Add New Subject")
+            .setView(dialogView)
+            .setPositiveButton(if (subjectToEdit != null) "Update" else "Add") { _, _ ->
+                val name = etSubjectName.text.toString().trim()
+                if (name.isNotEmpty()) {
+                    if (subjectToEdit != null) {
+                        db.collection("subjects").document(subjectToEdit.id).update("name", name)
+                    } else {
+                        val subjectId = db.collection("subjects").document().id
+                        val newSubject = Subject(id = subjectId, name = name)
+                        db.collection("subjects").document(subjectId).set(newSubject)
+                    }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun deleteSubject(subject: Subject) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Subject")
+            .setMessage("Are you sure you want to delete '${subject.name}'?")
+            .setPositiveButton("Delete") { _, _ ->
+                db.collection("subjects").document(subject.id).delete()
             }
             .setNegativeButton("Cancel", null)
             .show()

@@ -84,7 +84,7 @@ class StudentDashboardFragment : Fragment() {
             Toast.makeText(context, "Assignments feature coming soon!", Toast.LENGTH_SHORT).show()
         }
         binding.cardViewMaterials.setOnClickListener {
-            findNavController().navigate(R.id.action_studentDashboardFragment_to_courseMaterialsFragment)
+            findNavController().navigate(R.id.action_studentDashboardFragment_to_subjectsFragment)
         }
     }
 
