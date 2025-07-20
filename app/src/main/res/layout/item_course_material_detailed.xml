@@ -31,16 +31,17 @@
             android:layout_toEndOf="@id/ivFileType"
             android:textColor="@android:color/white"
             android:textStyle="bold"
-            tools:text="Algebra Basics.pdf" />
+            tools:text="Lesson Title: Algebra Basics.pdf" />
 
         <TextView
-            android:id="@+id/tvUploadDate"
+            android:id="@+id/tvSubjectName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/tvMaterialTitle"
             android:layout_alignStart="@id/tvMaterialTitle"
             android:textColor="#CCCCCC"
-            tools:text="Oct 01, 2023" />
+            android:textSize="12sp"
+            tools:text="Subject: Science" />
 
         <ImageView
             android:id="@+id/ivDelete"

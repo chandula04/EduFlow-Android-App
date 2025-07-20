@@ -97,9 +97,11 @@
         android:name="com.cmw.eduflow.TeacherDashboardFragment"
         android:label="Teacher Dashboard"
         tools:layout="@layout/fragment_teacher_dashboard" >
+
         <action
             android:id="@+id/action_teacherDashboardFragment_to_subjectsFragment"
             app:destination="@id/subjectsFragment" />
+
         <action
             android:id="@+id/action_teacherDashboardFragment_to_materialsListFragment"
             app:destination="@id/materialsListFragment" />

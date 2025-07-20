@@ -32,8 +32,12 @@ class CourseMaterialAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(material: CourseMaterial) {
             binding.tvMaterialTitle.text = material.lessonTitle
+            binding.tvSubjectName.text = "Subject: ${material.subjectName}"
+
             val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-            binding.tvUploadDate.text = sdf.format(material.uploadedAt.toDate())
+            // This assumes your CourseMaterial data class has 'uploadedAt'
+            // If not, you can remove or comment out this line.
+            // binding.tvUploadDate.text = sdf.format(material.uploadedAt.toDate())
 
             if (material.fileType == "video") {
                 binding.ivFileType.setImageResource(R.drawable.ic_file_video)
@@ -46,7 +50,6 @@ class CourseMaterialAdapter(
                 binding.root.context.startActivity(intent)
             }
 
-            // ✅ SET ONCLICK LISTENERS
             binding.ivEdit.setOnClickListener { onEditClick(material) }
             binding.ivDelete.setOnClickListener { onDeleteClick(material) }
         }
