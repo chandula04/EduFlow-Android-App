@@ -86,10 +86,7 @@ class TeacherDashboardFragment : Fragment() {
         binding.tvCreateAssignment.setOnClickListener { showCreateAssignmentDialog(null) }
         binding.tvUploadMaterial.setOnClickListener { showUploadMaterialDialog(null) }
 
-        binding.calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            val selectedDate = Calendar.getInstance().apply { set(year, month, dayOfMonth) }
-            fetchAttendanceForDate(selectedDate)
-        }
+
     }
 
     private fun setupRecyclerViews() {
@@ -113,7 +110,7 @@ class TeacherDashboardFragment : Fragment() {
         )
         binding.rvCourseMaterials.adapter = materialAdapter
 
-        binding.rvAttendance.layoutManager = LinearLayoutManager(context)
+
     }
 
     private fun fetchData() {
@@ -156,10 +153,10 @@ class TeacherDashboardFragment : Fragment() {
             .get()
             .addOnSuccessListener { result ->
                 val records = result.toObjects(AttendanceRecord::class.java)
-                attendanceAdapter = AttendanceAdapter(records) { recordToDelete ->
+                attendanceAdapter = AttendanceAdapter(records, "teacher") { recordToDelete ->
                     showDeleteAttendanceDialog(recordToDelete)
                 }
-                binding.rvAttendance.adapter = attendanceAdapter
+
                 setLoading(false)
             }
     }
@@ -213,8 +210,7 @@ class TeacherDashboardFragment : Fragment() {
                 db.collection("attendance").document(record.id).delete()
                     .addOnSuccessListener {
                         Toast.makeText(context, "Record deleted.", Toast.LENGTH_SHORT).show()
-                        val calendar = Calendar.getInstance().apply { timeInMillis = binding.calendarView.date }
-                        fetchAttendanceForDate(calendar)
+
                     }
             }
             .setNegativeButton("Cancel", null)
