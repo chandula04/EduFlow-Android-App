@@ -29,6 +29,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import java.text.SimpleDateFormat
 import java.util.*
 
 class TeacherDashboardFragment : Fragment() {
@@ -46,7 +47,6 @@ class TeacherDashboardFragment : Fragment() {
     private var selectedDueDate: Calendar = Calendar.getInstance()
     private var tvSelectedFileNameInDialog: TextView? = null
 
-    //pick files
     private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
@@ -56,12 +56,12 @@ class TeacherDashboardFragment : Fragment() {
         }
     }
 
-    //teacher qr code scan for attenders
     private val qrScannerLauncher = registerForActivityResult(ScanContract()) { result ->
         if (result.contents == null) {
             Toast.makeText(context, "Scan cancelled", Toast.LENGTH_LONG).show()
         } else {
-            Toast.makeText(context, "Scanned: ${result.contents}", Toast.LENGTH_LONG).show()
+            val studentId = result.contents
+            markAttendance(studentId)
         }
     }
 
@@ -72,10 +72,10 @@ class TeacherDashboardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//data from firebase
+
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
-//functions
+
         setupToolbar()
         setupRecyclerViews()
         fetchData()
@@ -114,7 +114,7 @@ class TeacherDashboardFragment : Fragment() {
             setLoading(false)
             return
         }
-//cathc data from firebase
+
         db.collection("assignments")
             .whereEqualTo("teacherId", userId)
             .orderBy("dueDate", Query.Direction.DESCENDING)
@@ -133,6 +133,46 @@ class TeacherDashboardFragment : Fragment() {
                 if (e != null) { return@addSnapshotListener }
                 val materials = snapshots?.toObjects(CourseMaterial::class.java)
                 materialAdapter.submitList(materials)
+            }
+    }
+
+    private fun markAttendance(studentId: String) {
+        setLoading(true)
+        db.collection("users").document(studentId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val studentName = document.getString("name") ?: "Unknown Student"
+
+                    val calendar = Calendar.getInstance()
+                    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    val dateString = sdf.format(calendar.time)
+
+                    val recordId = db.collection("attendance").document().id
+                    val attendanceRecord = AttendanceRecord(
+                        id = recordId,
+                        studentId = studentId,
+                        studentName = studentName,
+                        timestamp = Timestamp.now(),
+                        dateString = dateString
+                    )
+
+                    db.collection("attendance").document(recordId).set(attendanceRecord)
+                        .addOnSuccessListener {
+                            setLoading(false)
+                            Toast.makeText(context, "$studentName marked as present!", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener {
+                            setLoading(false)
+                            Toast.makeText(context, "Failed to save attendance.", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    setLoading(false)
+                    Toast.makeText(context, "Student ID not found.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener {
+                setLoading(false)
+                Toast.makeText(context, "Error fetching student details.", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -298,7 +338,7 @@ class TeacherDashboardFragment : Fragment() {
                 override fun onReschedule(requestId: String, error: ErrorInfo) {}
             }).dispatch()
     }
-//create material
+
     private fun saveMaterialToFirestore(lessonTitle: String, subjectName: String, fileUrl: String, fileType: String) {
         val userId = auth.currentUser?.uid ?: return
         val materialId = db.collection("materials").document().id
@@ -315,7 +355,6 @@ class TeacherDashboardFragment : Fragment() {
             .addOnSuccessListener { setLoading(false); Toast.makeText(context, "Material uploaded!", Toast.LENGTH_SHORT).show() }
     }
 
-    //delete function
     private fun showDeleteMaterialDialog(material: CourseMaterial) {
         AlertDialog.Builder(requireContext())
             .setTitle("Delete Material")

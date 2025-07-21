@@ -31,7 +31,7 @@ class StudentDashboardFragment : Fragment() {
         _binding = FragmentStudentDashboardBinding.inflate(inflater, container, false)
         return binding.root
     }
-//function define
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -43,7 +43,7 @@ class StudentDashboardFragment : Fragment() {
         fetchData()
         setupClickListeners()
     }
-//logout and profile edit button
+
     private fun setupToolbar() {
         binding.toolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
@@ -64,7 +64,6 @@ class StudentDashboardFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        // This tells the adapter the user is a "student" so it hides the edit/delete buttons
         materialAdapter = CourseMaterialAdapter(
             userRole = "student",
             onEditClick = { /* Students cannot edit */ },
@@ -72,7 +71,7 @@ class StudentDashboardFragment : Fragment() {
         )
         binding.rvCourseMaterials.adapter = materialAdapter
     }
-//coursework upload (cloudinary)
+
     private fun fetchData() {
         db.collection("materials")
             .orderBy("uploadedAt", Query.Direction.DESCENDING)
@@ -94,6 +93,15 @@ class StudentDashboardFragment : Fragment() {
 
         binding.cardViewResults.setOnClickListener {
             showResultsDialog()
+        }
+
+        binding.cardViewAttendance.setOnClickListener {
+            findNavController().navigate(R.id.action_studentDashboardFragment_to_attendanceFragment)
+        }
+
+        // ✅ ADDED THIS CLICK LISTENER
+        binding.cardViewAttendance.setOnClickListener {
+            findNavController().navigate(R.id.action_studentDashboardFragment_to_attendanceFragment)
         }
     }
 

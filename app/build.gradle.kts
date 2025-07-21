@@ -75,4 +75,7 @@ dependencies {
     //FILE UPLOAD
     implementation("com.cloudinary:cloudinary-android:2.4.0")
 
+    //notfications
+    implementation("com.google.firebase:firebase-messaging-ktx")
+
 }

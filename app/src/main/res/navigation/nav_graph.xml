@@ -159,4 +159,18 @@
             app:argType="string" />
     </fragment>
 
+    <fragment
+        android:id="@+id/attendanceFragment"
+        android:name="com.cmw.eduflow.AttendanceFragment"
+        android:label="Attendance"
+        tools:layout="@layout/fragment_attendance" />
+
+    <action
+        android:id="@+id/action_teacherDashboardFragment_to_attendanceFragment"
+        app:destination="@id/attendanceFragment" />
+
+    <action
+        android:id="@+id/action_studentDashboardFragment_to_attendanceFragment"
+        app:destination="@id/attendanceFragment" />
+
 </navigation>

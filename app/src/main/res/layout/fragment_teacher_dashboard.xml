@@ -143,6 +143,31 @@
                 tools:listitem="@layout/item_subject"
                 tools:itemCount="2"/>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Attendance Records"
+                android:textSize="18sp"
+                android:layout_marginTop="24dp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"/>
+
+            <CalendarView
+                android:id="@+id/calendarView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvAttendance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_attendance"
+                tools:itemCount="3"/>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
