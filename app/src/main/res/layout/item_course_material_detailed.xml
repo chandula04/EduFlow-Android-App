@@ -19,17 +19,17 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="16dp"
             app:tint="@color/white"
             tools:src="@drawable/ic_file_pdf" />
 
         <TextView
             android:id="@+id/tvMaterialTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_toStartOf="@+id/ivDownload"
             android:layout_toEndOf="@id/ivFileType"
             android:textColor="@android:color/white"
-            android:textSize="16sp"
             android:textStyle="bold"
             tools:text="Lesson Title: Algebra Basics.pdf" />
 
@@ -38,44 +38,50 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/tvMaterialTitle"
-            android:layout_toEndOf="@id/ivFileType"
+            android:layout_alignStart="@id/tvMaterialTitle"
             android:textColor="#CCCCCC"
             android:textSize="12sp"
             tools:text="Subject: Science" />
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/tvUploadDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvSubjectName"
+            android:layout_alignStart="@id/tvMaterialTitle"
+            android:textColor="#CCCCCC"
+            android:textSize="12sp"
+            tools:text="Uploaded: Jul 20, 2025" />
+
+        <ImageView
+            android:id="@+id/ivDelete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:orientation="horizontal">
+            android:padding="4dp"
+            app:tint="@color/white"
+            android:src="@drawable/ic_delete" />
 
-            <ImageView
-                android:id="@+id/ivDownload"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="6dp"
-                android:src="@drawable/ic_download"
-                app:tint="@color/white" />
+        <ImageView
+            android:id="@+id/ivEdit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="16dp"
+            android:layout_toStartOf="@id/ivDelete"
+            android:padding="4dp"
+            app:tint="@color/white"
+            android:src="@drawable/ic_edit_pencil" />
 
-            <ImageView
-                android:id="@+id/ivEdit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="6dp"
-                android:layout_marginStart="12dp"
-                android:src="@drawable/ic_edit_pencil"
-                app:tint="@color/white" />
-
-            <ImageView
-                android:id="@+id/ivDelete"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="6dp"
-                android:layout_marginStart="12dp"
-                android:src="@drawable/ic_delete"
-                app:tint="@color/white" />
-
-        </LinearLayout>
+        <ImageView
+            android:id="@+id/ivDownload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="16dp"
+            android:layout_toStartOf="@id/ivEdit"
+            android:src="@drawable/ic_download"
+            app:tint="@color/white" />
     </RelativeLayout>
 </com.google.android.material.card.MaterialCardView>

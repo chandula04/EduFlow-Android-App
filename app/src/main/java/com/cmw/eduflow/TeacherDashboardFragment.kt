@@ -88,7 +88,8 @@ class TeacherDashboardFragment : Fragment() {
             userRole = "teacher",
             onEditClick = { assignment -> showCreateAssignmentDialog(assignment) },
             onDeleteClick = { assignment -> showDeleteConfirmationDialog(assignment) },
-            onUploadClick = { /* Teachers don't upload answers, so this is empty */ }
+            onUploadClick = { /* Teachers do not upload answers */ },
+            onSubmissionClick = { /* Teachers do not view submissions this way */ }
         )
         binding.rvAssignments.adapter = assignmentAdapter
 
@@ -114,7 +115,9 @@ class TeacherDashboardFragment : Fragment() {
             .addSnapshotListener { snapshots, e ->
                 if (e != null) { return@addSnapshotListener }
                 val assignments = snapshots?.toObjects(Assignment::class.java)
-                assignmentAdapter.submitList(assignments)
+                // Convert the list to the correct type for the adapter
+                val assignmentPairs = assignments?.map { Pair(it, null as Submission?) }
+                assignmentAdapter.submitList(assignmentPairs)
             }
 
         db.collection("materials")

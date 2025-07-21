@@ -36,9 +36,8 @@ class CourseMaterialAdapter(
             binding.tvMaterialTitle.text = material.lessonTitle
             binding.tvSubjectName.text = "Subject: ${material.subjectName}"
 
-            // This line was missing, re-added to prevent potential crashes
             val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-            // binding.tvUploadDate.text = sdf.format(material.uploadedAt.toDate())
+            binding.tvUploadDate.text = "Uploaded: ${sdf.format(material.uploadedAt.toDate())}"
 
             if (material.fileType == "video") {
                 binding.ivFileType.setImageResource(R.drawable.ic_file_video)
@@ -46,7 +45,7 @@ class CourseMaterialAdapter(
                 binding.ivFileType.setImageResource(R.drawable.ic_file_pdf)
             }
 
-            // Show/hide buttons based on role
+            // Show/hide buttons based on the user's role
             if (userRole == "teacher") {
                 binding.ivEdit.visibility = View.VISIBLE
                 binding.ivDelete.visibility = View.VISIBLE
@@ -66,7 +65,11 @@ class CourseMaterialAdapter(
     }
 
     class DiffCallback : DiffUtil.ItemCallback<CourseMaterial>() {
-        override fun areItemsTheSame(oldItem: CourseMaterial, newItem: CourseMaterial) = oldItem.id == newItem.id
-        override fun areContentsTheSame(oldItem: CourseMaterial, newItem: CourseMaterial) = oldItem == newItem
+        override fun areItemsTheSame(oldItem: CourseMaterial, newItem: CourseMaterial): Boolean {
+            return oldItem.id == newItem.id
+        }
+        override fun areContentsTheSame(oldItem: CourseMaterial, newItem: CourseMaterial): Boolean {
+            return oldItem == newItem
+        }
     }
 }

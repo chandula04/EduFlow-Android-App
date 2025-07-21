@@ -1,6 +1,7 @@
 package com.cmw.eduflow
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -34,17 +35,19 @@ class AssignmentsListFragment : Fragment() {
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
                 selectedFileUri = uri
-                // Here you would typically get the assignment object to upload for
-                // For simplicity, we assume the user remembers which assignment they clicked.
                 Toast.makeText(context, "File selected. Now uploading...", Toast.LENGTH_SHORT).show()
-                uploadSubmissionToCloudinary(lastClickedAssignmentId, lastClickedAssignmentTitle)
+                if (isReuploading) {
+                    reuploadSubmissionToCloudinary()
+                } else {
+                    uploadSubmissionToCloudinary()
+                }
             }
         }
     }
 
-    // To keep track of which assignment the user wants to submit for
     private var lastClickedAssignmentId: String = ""
-    private var lastClickedAssignmentTitle: String = ""
+    private var lastClickedSubmission: Submission? = null
+    private var isReuploading = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentAssignmentsListBinding.inflate(inflater, container, false)
@@ -63,36 +66,92 @@ class AssignmentsListFragment : Fragment() {
             onDeleteClick = { /* Students cannot delete */ },
             onUploadClick = { assignment ->
                 lastClickedAssignmentId = assignment.id
-                lastClickedAssignmentTitle = assignment.title
-                // Launch file picker for images and PDFs
-                val intent = Intent(Intent.ACTION_GET_CONTENT).apply { type = "image/*,application/pdf" }
-                filePickerLauncher.launch(intent)
+                isReuploading = false
+                launchFilePicker()
+            },
+            onSubmissionClick = { submission ->
+                lastClickedSubmission = submission
+                showSubmissionOptionsDialog()
             }
         )
         binding.rvAssignments.adapter = assignmentAdapter
 
-        fetchAssignments()
+        fetchAssignmentsAndSubmissions()
     }
 
-    private fun fetchAssignments() {
+    private fun launchFilePicker() {
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply { type = "application/pdf" }
+        filePickerLauncher.launch(intent)
+    }
+
+    private fun fetchAssignmentsAndSubmissions() {
         setLoading(true)
+        val studentId = auth.currentUser?.uid ?: return
+
         db.collection("assignments")
             .orderBy("dueDate", Query.Direction.DESCENDING)
-            .get().addOnSuccessListener { result ->
-                assignmentAdapter.submitList(result.toObjects(Assignment::class.java))
-                setLoading(false)
+            .get().addOnSuccessListener { assignmentsResult ->
+                val assignments = assignmentsResult.toObjects(Assignment::class.java)
+
+                db.collection("submissions").whereEqualTo("studentId", studentId).get()
+                    .addOnSuccessListener { submissionsResult ->
+                        val submissions = submissionsResult.toObjects(Submission::class.java)
+                        val submissionMap = submissions.associateBy { it.assignmentId }
+
+                        val assignmentsWithSubmissions = assignments.map { assignment ->
+                            Pair(assignment, submissionMap[assignment.id])
+                        }
+
+                        assignmentAdapter.submitList(assignmentsWithSubmissions)
+                        setLoading(false)
+                    }
             }
     }
 
-    private fun uploadSubmissionToCloudinary(assignmentId: String, assignmentTitle: String) {
-        if (selectedFileUri == null) return
+    private fun showSubmissionOptionsDialog() {
+        val options = arrayOf("Re-upload Answer", "Delete Submission")
+        AlertDialog.Builder(requireContext())
+            .setTitle("Submission Options")
+            .setItems(options) { dialog, which ->
+                when (which) {
+                    0 -> { // Re-upload
+                        isReuploading = true
+                        launchFilePicker()
+                    }
+                    1 -> { // Delete
+                        showDeleteSubmissionConfirmation()
+                    }
+                }
+            }
+            .show()
+    }
+
+    private fun showDeleteSubmissionConfirmation() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Submission")
+            .setMessage("Are you sure you want to delete your submission?")
+            .setPositiveButton("Delete") { _, _ ->
+                lastClickedSubmission?.let {
+                    db.collection("submissions").document(it.id).delete()
+                        .addOnSuccessListener {
+                            Toast.makeText(context, "Submission deleted.", Toast.LENGTH_SHORT).show()
+                            fetchAssignmentsAndSubmissions() // Refresh list
+                        }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun uploadSubmissionToCloudinary() {
+        if (selectedFileUri == null || lastClickedAssignmentId.isEmpty()) return
         setLoading(true)
         MediaManager.get().upload(selectedFileUri)
             .unsigned("eduflow_unsigned")
             .callback(object: UploadCallback {
                 override fun onSuccess(requestId: String, resultData: Map<*, *>) {
                     val url = resultData["secure_url"].toString()
-                    saveSubmissionToFirestore(assignmentId, url)
+                    saveSubmissionToFirestore(url)
                 }
                 override fun onError(requestId: String, error: ErrorInfo) {
                     setLoading(false)
@@ -104,19 +163,42 @@ class AssignmentsListFragment : Fragment() {
             }).dispatch()
     }
 
-    private fun saveSubmissionToFirestore(assignmentId: String, fileUrl: String) {
-        val user = auth.currentUser
-        if (user == null) {
-            setLoading(false); return
-        }
+    private fun reuploadSubmissionToCloudinary() {
+        if (selectedFileUri == null || lastClickedSubmission == null) return
+        setLoading(true)
+        MediaManager.get().upload(selectedFileUri)
+            .unsigned("eduflow_unsigned")
+            .callback(object: UploadCallback {
+                override fun onSuccess(requestId: String, resultData: Map<*, *>) {
+                    val newUrl = resultData["secure_url"].toString()
+                    db.collection("submissions").document(lastClickedSubmission!!.id)
+                        .update("fileUrl", newUrl, "submittedAt", Timestamp.now())
+                        .addOnSuccessListener {
+                            setLoading(false)
+                            Toast.makeText(context, "Answer re-uploaded successfully!", Toast.LENGTH_SHORT).show()
+                            fetchAssignmentsAndSubmissions()
+                        }
+                }
+                override fun onError(requestId: String, error: ErrorInfo) {
+                    setLoading(false)
+                    Toast.makeText(context, "Re-upload Error: ${error.description}", Toast.LENGTH_LONG).show()
+                }
+                override fun onStart(requestId: String) {}
+                override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {}
+                override fun onReschedule(requestId: String, error: ErrorInfo) {}
+            }).dispatch()
+    }
 
-        // Get student's name from their own user document
+    private fun saveSubmissionToFirestore(fileUrl: String) {
+        val user = auth.currentUser
+        if (user == null) { setLoading(false); return }
+
         db.collection("users").document(user.uid).get().addOnSuccessListener { userDoc ->
             val studentName = userDoc.getString("name") ?: "Unknown Student"
             val submissionId = db.collection("submissions").document().id
             val submission = Submission(
                 id = submissionId,
-                assignmentId = assignmentId,
+                assignmentId = lastClickedAssignmentId,
                 studentId = user.uid,
                 studentName = studentName,
                 fileUrl = fileUrl,
@@ -127,6 +209,7 @@ class AssignmentsListFragment : Fragment() {
                 .addOnSuccessListener {
                     setLoading(false)
                     Toast.makeText(context, "Answer submitted successfully!", Toast.LENGTH_SHORT).show()
+                    fetchAssignmentsAndSubmissions() // Refresh the list
                 }
                 .addOnFailureListener {
                     setLoading(false)

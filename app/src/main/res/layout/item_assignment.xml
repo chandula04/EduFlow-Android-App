@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardBackgroundColor="#212121"
+    app:cardBackgroundColor="#FFFFFF"
     app:cardCornerRadius="16dp"
-    app:cardElevation="2dp"
-    android:layout_marginBottom="12dp">
+    app:cardElevation="4dp"
+    android:layout_margin="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -25,63 +25,35 @@
                 android:layout_height="wrap_content"
                 android:layout_toStartOf="@+id/ivDownload"
                 android:layout_alignParentStart="true"
-                android:textColor="@android:color/white"
+                android:textColor="@android:color/black"
                 android:textSize="16sp"
+                android:layout_marginEnd="16dp"
                 android:textStyle="bold"
                 tools:text="Math Homework - Chapter 3" />
-
-            <TextView
-                android:id="@+id/tvDueDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tvAssignmentTitle"
-                android:textColor="#CCCCCC"
-                tools:text="Due: Nov 15, 2023" />
-
-            <ImageView
-                android:id="@+id/ivDelete"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:padding="6dp"
-                android:src="@drawable/ic_delete"
-                app:tint="@color/white" />
-
-            <ImageView
-                android:id="@+id/ivEdit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="12dp"
-                android:layout_toStartOf="@id/ivDelete"
-                android:padding="6dp"
-                android:src="@drawable/ic_edit_pencil"
-                app:tint="@color/white" />
 
             <ImageView
                 android:id="@+id/ivDownload"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:layout_marginEnd="12dp"
-                android:layout_toStartOf="@id/ivEdit"
                 android:padding="6dp"
-                android:src="@drawable/ic_download"
-                app:tint="@color/white" />
-
+                android:src="@drawable/ic_download" />
         </RelativeLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#444444"
-            android:layout_marginVertical="12dp"/>
+        <TextView
+            android:id="@+id/tvDueDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#666666"
+            android:layout_marginTop="4dp"
+            tools:text="Due: Nov 15, 2023" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
+            android:layout_marginTop="12dp"
             android:orientation="horizontal">
 
             <TextView
@@ -104,9 +76,20 @@
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Upload Answer"
-                android:textColor="@color/white"
-                app:strokeColor="@color/white"/>
+                android:text="Upload Answer" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnUploaded"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Uploaded"
+                android:visibility="gone"
+                app:icon="@drawable/ic_checkmark_circle"
+                app:iconTint="@color/white"
+                app:backgroundTint="#4CAF50"/>
+
+            <ImageView android:id="@+id/ivEdit" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+            <ImageView android:id="@+id/ivDelete" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
