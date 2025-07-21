@@ -46,18 +46,7 @@ class TeacherDashboardFragment : Fragment() {
     private var selectedDueDate: Calendar = Calendar.getInstance()
     private var tvSelectedFileNameInDialog: TextView? = null
 
-
     private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            result.data?.data?.let { uri ->
-                selectedFileUri = uri
-                tvSelectedFileNameInDialog?.text = "File selected!"
-            }
-        }
-    }
-
-    // ✅ THESE WERE THE MISSING VARIABLES
-    private val pdfPickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
                 selectedFileUri = uri
@@ -112,7 +101,14 @@ class TeacherDashboardFragment : Fragment() {
 
     private fun fetchData() {
         setLoading(true)
+        val userId = auth.currentUser?.uid
+        if (userId == null) {
+            setLoading(false)
+            return
+        }
+
         db.collection("assignments")
+            .whereEqualTo("teacherId", userId)
             .orderBy("dueDate", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, e ->
                 if (e != null) { return@addSnapshotListener }
@@ -121,6 +117,7 @@ class TeacherDashboardFragment : Fragment() {
             }
 
         db.collection("materials")
+            .whereEqualTo("teacherId", userId)
             .orderBy("uploadedAt", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, e ->
                 setLoading(false)
@@ -147,7 +144,7 @@ class TeacherDashboardFragment : Fragment() {
         tvDueDate.setOnClickListener { showDatePickerDialog(tvDueDate) }
         btnSelectPdf.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply { type = "application/pdf" }
-            pdfPickerLauncher.launch(intent)
+            filePickerLauncher.launch(intent)
         }
 
         AlertDialog.Builder(requireContext())
@@ -228,7 +225,7 @@ class TeacherDashboardFragment : Fragment() {
             .show()
     }
 
-    private fun showUploadMaterialDialog(materialToEdit: CourseMaterial?) {
+    private fun showUploadMaterialDialog(materialToEdit: CourseMaterial? = null) {
         val isEditing = materialToEdit != null
         selectedFileUri = null
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_upload_material, null)
