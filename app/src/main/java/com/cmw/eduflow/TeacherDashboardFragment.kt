@@ -46,7 +46,18 @@ class TeacherDashboardFragment : Fragment() {
     private var selectedDueDate: Calendar = Calendar.getInstance()
     private var tvSelectedFileNameInDialog: TextView? = null
 
+
     private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.data?.let { uri ->
+                selectedFileUri = uri
+                tvSelectedFileNameInDialog?.text = "File selected!"
+            }
+        }
+    }
+
+    // ✅ THESE WERE THE MISSING VARIABLES
+    private val pdfPickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
                 selectedFileUri = uri
@@ -136,7 +147,7 @@ class TeacherDashboardFragment : Fragment() {
         tvDueDate.setOnClickListener { showDatePickerDialog(tvDueDate) }
         btnSelectPdf.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply { type = "application/pdf" }
-            filePickerLauncher.launch(intent)
+            pdfPickerLauncher.launch(intent)
         }
 
         AlertDialog.Builder(requireContext())
@@ -185,13 +196,15 @@ class TeacherDashboardFragment : Fragment() {
     }
 
     private fun saveAssignmentToFirestore(title: String, fileUrl: String, dueDate: Timestamp) {
+        val userId = auth.currentUser?.uid ?: return
         val assignmentId = db.collection("assignments").document().id
         val newAssignment = Assignment(
             id = assignmentId,
             title = title,
             dueDate = dueDate,
             status = "Pending",
-            fileUrl = fileUrl
+            fileUrl = fileUrl,
+            teacherId = userId
         )
         db.collection("assignments").document(assignmentId).set(newAssignment)
             .addOnSuccessListener {
@@ -281,6 +294,7 @@ class TeacherDashboardFragment : Fragment() {
     }
 
     private fun saveMaterialToFirestore(lessonTitle: String, subjectName: String, fileUrl: String, fileType: String) {
+        val userId = auth.currentUser?.uid ?: return
         val materialId = db.collection("materials").document().id
         val material = CourseMaterial(
             id = materialId,
@@ -288,7 +302,8 @@ class TeacherDashboardFragment : Fragment() {
             subjectName = subjectName,
             fileUrl = fileUrl,
             fileType = if (fileType == "raw") "pdf" else fileType,
-            uploadedAt = Timestamp.now()
+            uploadedAt = Timestamp.now(),
+            teacherId = userId
         )
         db.collection("materials").document(materialId).set(material)
             .addOnSuccessListener { setLoading(false); Toast.makeText(context, "Material uploaded!", Toast.LENGTH_SHORT).show() }

@@ -7,5 +7,6 @@ data class Assignment(
     val title: String = "",
     val dueDate: Timestamp = Timestamp.now(),
     val status: String = "Pending", // e.g., "Pending", "Graded", "Overdue"
-    val fileUrl: String = ""
+    val fileUrl: String = "",
+    val teacherId: String = ""
 )
