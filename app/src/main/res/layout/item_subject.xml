@@ -6,11 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginVertical="8dp"
-    app:cardBackgroundColor="#4AFFFFFF"
+    app:cardBackgroundColor="#4D212121"
     app:cardCornerRadius="20dp"
     app:cardElevation="0dp"
-    app:strokeColor="#80FFFFFF"
-    app:strokeWidth="1dp">
+    app:strokeWidth="0dp">
 
     <RelativeLayout
         android:id="@+id/subject_item_container"
