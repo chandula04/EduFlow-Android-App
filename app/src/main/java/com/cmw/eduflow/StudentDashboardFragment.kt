@@ -25,7 +25,7 @@ class StudentDashboardFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
-    private lateinit var subjectsAdapter: SubjectsAdapter
+    private lateinit var materialAdapter: CourseMaterialAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentStudentDashboardBinding.inflate(inflater, container, false)
@@ -64,24 +64,22 @@ class StudentDashboardFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        subjectsAdapter = SubjectsAdapter(
-            onItemClick = { subject ->
-                // When a student clicks a subject, navigate to the materials list for that subject
-                val action = StudentDashboardFragmentDirections.actionStudentDashboardFragmentToMaterialsListFragment(subject.id, subject.name)
-                findNavController().navigate(action)
-            },
+        // Tell the adapter the user is a "student" so it hides the edit/delete buttons
+        materialAdapter = CourseMaterialAdapter(
+            userRole = "student",
             onEditClick = { /* Students cannot edit */ },
             onDeleteClick = { /* Students cannot delete */ }
         )
-        binding.rvSubjects.adapter = subjectsAdapter
+        binding.rvCourseMaterials.adapter = materialAdapter
     }
 
     private fun fetchData() {
-        db.collection("subjects")
+        db.collection("materials")
+            .orderBy("uploadedAt", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, e ->
                 if (e != null) { return@addSnapshotListener }
-                val subjects = snapshots?.toObjects(Subject::class.java)
-                subjectsAdapter.submitList(subjects)
+                val materials = snapshots?.toObjects(CourseMaterial::class.java)
+                materialAdapter.submitList(materials)
             }
     }
 
