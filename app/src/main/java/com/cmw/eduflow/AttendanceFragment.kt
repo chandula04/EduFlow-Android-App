@@ -1,9 +1,11 @@
 package com.cmw.eduflow
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -33,42 +35,36 @@ class AttendanceFragment : Fragment() {
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
         binding.rvAttendance.layoutManager = LinearLayoutManager(context)
 
-        fetchUserRoleAndSetupUI()
+        fetchUserRoleAndData()
     }
 
-    private fun fetchUserRoleAndSetupUI() {
+    private fun fetchUserRoleAndData() {
         val userId = auth.currentUser?.uid ?: return
         db.collection("users").document(userId).get().addOnSuccessListener { document ->
             if (document.exists()) {
                 currentUserRole = document.getString("role") ?: "student"
             }
+
+            // Now that we have the role, fetch the appropriate data
             if (currentUserRole == "teacher") {
-                binding.calendarView.visibility = View.VISIBLE
-                fetchAttendanceForDate(Calendar.getInstance())
-                binding.calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-                    val selectedDate = Calendar.getInstance().apply { set(year, month, dayOfMonth) }
-                    fetchAttendanceForDate(selectedDate)
-                }
+                binding.toolbar.title = "All Attendance Records"
+                fetchAllAttendance()
             } else {
-                binding.calendarView.visibility = View.GONE
                 binding.toolbar.title = "My Attendance History"
                 fetchStudentAttendance(userId)
             }
         }
     }
 
-    private fun fetchAttendanceForDate(date: Calendar) {
-        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val dateString = sdf.format(date.time)
-        binding.toolbar.subtitle = dateString
-
+    private fun fetchAllAttendance() {
         db.collection("attendance")
-            .whereEqualTo("dateString", dateString)
-            .orderBy("timestamp", Query.Direction.ASCENDING)
+            .orderBy("timestamp", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { result ->
                 val records = result.toObjects(AttendanceRecord::class.java)
-                binding.rvAttendance.adapter = AttendanceAdapter(records)
+                binding.rvAttendance.adapter = AttendanceAdapter(records, "teacher") { recordToDelete ->
+                    showDeleteAttendanceDialog(recordToDelete)
+                }
             }
     }
 
@@ -79,8 +75,23 @@ class AttendanceFragment : Fragment() {
             .get()
             .addOnSuccessListener { result ->
                 val records = result.toObjects(AttendanceRecord::class.java)
-                binding.rvAttendance.adapter = AttendanceAdapter(records)
+                binding.rvAttendance.adapter = AttendanceAdapter(records, "student") { /* Students can't delete */ }
             }
+    }
+
+    private fun showDeleteAttendanceDialog(record: AttendanceRecord) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Attendance")
+            .setMessage("Are you sure you want to delete the record for ${record.studentName}?")
+            .setPositiveButton("Delete") { _, _ ->
+                db.collection("attendance").document(record.id).delete()
+                    .addOnSuccessListener {
+                        Toast.makeText(context, "Record deleted.", Toast.LENGTH_SHORT).show()
+                        fetchAllAttendance() // Refresh the list
+                    }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     override fun onDestroyView() {

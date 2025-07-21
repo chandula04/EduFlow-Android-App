@@ -18,6 +18,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.cmw.eduflow.databinding.FragmentTeacherDashboardBinding
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
@@ -42,6 +43,7 @@ class TeacherDashboardFragment : Fragment() {
 
     private lateinit var assignmentAdapter: AssignmentAdapter
     private lateinit var materialAdapter: CourseMaterialAdapter
+    private lateinit var attendanceAdapter: AttendanceAdapter
 
     private var selectedFileUri: Uri? = null
     private var selectedDueDate: Calendar = Calendar.getInstance()
@@ -81,8 +83,13 @@ class TeacherDashboardFragment : Fragment() {
         fetchData()
 
         binding.btnScanQr.setOnClickListener { launchScanner() }
-        binding.tvCreateAssignment.setOnClickListener { showCreateAssignmentDialog() }
+        binding.tvCreateAssignment.setOnClickListener { showCreateAssignmentDialog(null) }
         binding.tvUploadMaterial.setOnClickListener { showUploadMaterialDialog(null) }
+
+        binding.calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
+            val selectedDate = Calendar.getInstance().apply { set(year, month, dayOfMonth) }
+            fetchAttendanceForDate(selectedDate)
+        }
     }
 
     private fun setupRecyclerViews() {
@@ -105,6 +112,8 @@ class TeacherDashboardFragment : Fragment() {
             onDeleteClick = { material -> showDeleteMaterialDialog(material) }
         )
         binding.rvCourseMaterials.adapter = materialAdapter
+
+        binding.rvAttendance.layoutManager = LinearLayoutManager(context)
     }
 
     private fun fetchData() {
@@ -129,10 +138,29 @@ class TeacherDashboardFragment : Fragment() {
             .whereEqualTo("teacherId", userId)
             .orderBy("uploadedAt", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, e ->
-                setLoading(false)
                 if (e != null) { return@addSnapshotListener }
                 val materials = snapshots?.toObjects(CourseMaterial::class.java)
                 materialAdapter.submitList(materials)
+            }
+
+        fetchAttendanceForDate(Calendar.getInstance())
+    }
+
+    private fun fetchAttendanceForDate(date: Calendar) {
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val dateString = sdf.format(date.time)
+
+        db.collection("attendance")
+            .whereEqualTo("dateString", dateString)
+            .orderBy("timestamp", Query.Direction.ASCENDING)
+            .get()
+            .addOnSuccessListener { result ->
+                val records = result.toObjects(AttendanceRecord::class.java)
+                attendanceAdapter = AttendanceAdapter(records) { recordToDelete ->
+                    showDeleteAttendanceDialog(recordToDelete)
+                }
+                binding.rvAttendance.adapter = attendanceAdapter
+                setLoading(false)
             }
     }
 
@@ -160,6 +188,7 @@ class TeacherDashboardFragment : Fragment() {
                         .addOnSuccessListener {
                             setLoading(false)
                             Toast.makeText(context, "$studentName marked as present!", Toast.LENGTH_SHORT).show()
+                            fetchAttendanceForDate(Calendar.getInstance()) // Refresh list
                         }
                         .addOnFailureListener {
                             setLoading(false)
@@ -174,6 +203,22 @@ class TeacherDashboardFragment : Fragment() {
                 setLoading(false)
                 Toast.makeText(context, "Error fetching student details.", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    private fun showDeleteAttendanceDialog(record: AttendanceRecord) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Attendance")
+            .setMessage("Are you sure you want to delete the attendance record for ${record.studentName}?")
+            .setPositiveButton("Delete") { _, _ ->
+                db.collection("attendance").document(record.id).delete()
+                    .addOnSuccessListener {
+                        Toast.makeText(context, "Record deleted.", Toast.LENGTH_SHORT).show()
+                        val calendar = Calendar.getInstance().apply { timeInMillis = binding.calendarView.date }
+                        fetchAttendanceForDate(calendar)
+                    }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun showCreateAssignmentDialog(assignmentToEdit: Assignment? = null) {
