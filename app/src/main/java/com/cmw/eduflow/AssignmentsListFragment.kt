@@ -30,7 +30,7 @@ class AssignmentsListFragment : Fragment() {
     private lateinit var db: FirebaseFirestore
 
     private var selectedFileUri: Uri? = null
-
+//student uploading
     private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->

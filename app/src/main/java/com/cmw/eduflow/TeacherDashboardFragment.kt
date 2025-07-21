@@ -46,6 +46,7 @@ class TeacherDashboardFragment : Fragment() {
     private var selectedDueDate: Calendar = Calendar.getInstance()
     private var tvSelectedFileNameInDialog: TextView? = null
 
+    //pick files
     private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
@@ -55,6 +56,7 @@ class TeacherDashboardFragment : Fragment() {
         }
     }
 
+    //teacher qr code scan for attenders
     private val qrScannerLauncher = registerForActivityResult(ScanContract()) { result ->
         if (result.contents == null) {
             Toast.makeText(context, "Scan cancelled", Toast.LENGTH_LONG).show()
@@ -70,10 +72,10 @@ class TeacherDashboardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+//data from firebase
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
-
+//functions
         setupToolbar()
         setupRecyclerViews()
         fetchData()
@@ -112,7 +114,7 @@ class TeacherDashboardFragment : Fragment() {
             setLoading(false)
             return
         }
-
+//cathc data from firebase
         db.collection("assignments")
             .whereEqualTo("teacherId", userId)
             .orderBy("dueDate", Query.Direction.DESCENDING)
@@ -296,7 +298,7 @@ class TeacherDashboardFragment : Fragment() {
                 override fun onReschedule(requestId: String, error: ErrorInfo) {}
             }).dispatch()
     }
-
+//create material
     private fun saveMaterialToFirestore(lessonTitle: String, subjectName: String, fileUrl: String, fileType: String) {
         val userId = auth.currentUser?.uid ?: return
         val materialId = db.collection("materials").document().id
@@ -313,6 +315,7 @@ class TeacherDashboardFragment : Fragment() {
             .addOnSuccessListener { setLoading(false); Toast.makeText(context, "Material uploaded!", Toast.LENGTH_SHORT).show() }
     }
 
+    //delete function
     private fun showDeleteMaterialDialog(material: CourseMaterial) {
         AlertDialog.Builder(requireContext())
             .setTitle("Delete Material")

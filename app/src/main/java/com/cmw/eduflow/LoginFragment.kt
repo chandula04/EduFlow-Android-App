@@ -17,14 +17,15 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class LoginFragment : Fragment() {
 
-    private var _binding: FragmentLoginBinding? = null
+    private var _binding: FragmentLoginBinding? = null //lifecycle method to prevent memory leaks when the Fragment's view is destroyed.
     private val binding get() = _binding!!
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
 
-    private val PREFS_NAME = "EduFlowPrefs"
-    private val KEY_EMAIL = "email"
+    //define functions
+    private val PREFS_NAME = "EduFlowPrefs"//define functions
+    private val KEY_EMAIL = "email" //define functions
     private val KEY_PASSWORD = "password"
     private val KEY_REMEMBER = "remember"
 
@@ -50,13 +51,13 @@ class LoginFragment : Fragment() {
         loadCredentials()
         setupClickListeners()
     }
-
+ // login button click event
     private fun setupClickListeners() {
         binding.btnLogin.setOnClickListener { handleLogin() }
         binding.tvGoToRegister.setOnClickListener { findNavController().navigate(R.id.action_loginFragment_to_registerFragment) }
         binding.tvForgotPassword.setOnClickListener { findNavController().navigate(R.id.action_loginFragment_to_forgotPasswordFragment) }
     }
-
+//login button functions
     private fun handleLogin() {
         val email = binding.etEmail.text.toString().trim()
         val password = binding.etPassword.text.toString().trim()

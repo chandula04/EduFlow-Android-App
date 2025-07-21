@@ -1,7 +1,7 @@
 package com.cmw.eduflow
 
 import com.google.firebase.Timestamp
-
+//predefined variable details of course materials
 data class CourseMaterial(
     val id: String = "",
     val lessonTitle: String = "",

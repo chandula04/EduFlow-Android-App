@@ -31,7 +31,7 @@ class StudentDashboardFragment : Fragment() {
         _binding = FragmentStudentDashboardBinding.inflate(inflater, container, false)
         return binding.root
     }
-
+//function define
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -43,7 +43,7 @@ class StudentDashboardFragment : Fragment() {
         fetchData()
         setupClickListeners()
     }
-
+//logout and profile edit button
     private fun setupToolbar() {
         binding.toolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
@@ -72,7 +72,7 @@ class StudentDashboardFragment : Fragment() {
         )
         binding.rvCourseMaterials.adapter = materialAdapter
     }
-
+//coursework upload (cloudinary)
     private fun fetchData() {
         db.collection("materials")
             .orderBy("uploadedAt", Query.Direction.DESCENDING)
