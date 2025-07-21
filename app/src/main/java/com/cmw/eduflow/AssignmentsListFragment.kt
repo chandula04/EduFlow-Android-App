@@ -72,7 +72,8 @@ class AssignmentsListFragment : Fragment() {
             onSubmissionClick = { submission ->
                 lastClickedSubmission = submission
                 showSubmissionOptionsDialog()
-            }
+            },
+            onViewSubmissionsClick = { /* Students do not view submissions */ }
         )
         binding.rvAssignments.adapter = assignmentAdapter
 

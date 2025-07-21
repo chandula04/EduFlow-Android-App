@@ -98,8 +98,8 @@
         android:label="Teacher Dashboard"
         tools:layout="@layout/fragment_teacher_dashboard" >
         <action
-            android:id="@+id/action_teacherDashboardFragment_to_subjectsFragment"
-            app:destination="@id/subjectsFragment" />
+            android:id="@+id/action_teacherDashboardFragment_to_submissionsListFragment"
+            app:destination="@id/submissionsListFragment" />
         <action
             android:id="@+id/action_teacherDashboardFragment_to_materialsListFragment"
             app:destination="@id/materialsListFragment" />
@@ -149,5 +149,14 @@
         android:name="com.cmw.eduflow.AssignmentsListFragment"
         android:label="Assignments"
         tools:layout="@layout/fragment_assignments_list" />
+
+    <fragment
+        android:id="@+id/submissionsListFragment"
+        android:name="com.cmw.eduflow.SubmissionsListFragment"
+        android:label="Student Submissions">
+        <argument
+            android:name="assignmentId"
+            app:argType="string" />
+    </fragment>
 
 </navigation>

@@ -64,7 +64,7 @@ class StudentDashboardFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        // Tell the adapter the user is a "student" so it hides the edit/delete buttons
+        // This tells the adapter the user is a "student" so it hides the edit/delete buttons
         materialAdapter = CourseMaterialAdapter(
             userRole = "student",
             onEditClick = { /* Students cannot edit */ },

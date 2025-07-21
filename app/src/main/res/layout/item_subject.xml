@@ -5,9 +5,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginVertical="8dp"
-    app:cardBackgroundColor="#212121"
-    app:cardCornerRadius="20dp"
+    android:layout_marginVertical="6dp"
+    app:cardBackgroundColor="#80000000"
+    app:cardCornerRadius="16dp"
     app:cardElevation="0dp"
     app:strokeWidth="0dp">
 
@@ -15,7 +15,7 @@
         android:id="@+id/subject_item_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="20dp">
 
         <TextView
             android:id="@+id/tvSubjectName"
@@ -24,26 +24,28 @@
             android:layout_toStartOf="@+id/ivEdit"
             android:layout_alignParentStart="true"
             android:textColor="@color/white"
-            android:textSize="18sp"
+            android:textSize="16sp"
+            android:textStyle="bold"
             tools:text="Mathematics" />
 
         <ImageView
             android:id="@+id/ivDelete"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:padding="8dp"
+            android:padding="4dp"
             android:src="@drawable/ic_delete"
             app:tint="@color/white" />
 
         <ImageView
             android:id="@+id/ivEdit"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toStartOf="@+id/ivDelete"
-            android:padding="8dp"
+            android:layout_marginEnd="12dp"
+            android:padding="4dp"
             android:src="@drawable/ic_edit_pencil"
             app:tint="@color/white" />
 

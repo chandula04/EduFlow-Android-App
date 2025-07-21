@@ -23,7 +23,7 @@
                 android:id="@+id/tvAssignmentTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toStartOf="@+id/ivDownload"
+                android:layout_toStartOf="@+id/actionsLayout"
                 android:layout_alignParentStart="true"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
@@ -31,14 +31,37 @@
                 android:textStyle="bold"
                 tools:text="Math Homework - Chapter 3" />
 
-            <ImageView
-                android:id="@+id/ivDownload"
+            <LinearLayout
+                android:id="@+id/actionsLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
                 android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:padding="6dp"
-                android:src="@drawable/ic_download" />
+                android:layout_centerVertical="true">
+
+                <ImageView
+                    android:id="@+id/ivDownload"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="6dp"
+                    android:src="@drawable/ic_download" />
+
+                <ImageView
+                    android:id="@+id/ivEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:padding="6dp"
+                    android:src="@drawable/ic_edit_pencil" />
+
+                <ImageView
+                    android:id="@+id/ivDelete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:padding="6dp"
+                    android:src="@drawable/ic_delete" />
+            </LinearLayout>
         </RelativeLayout>
 
         <TextView
@@ -61,8 +84,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/chip_background_pending"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="4dp"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="5dp"
+                android:textSize="12sp"
+                android:textStyle="bold"
                 android:textColor="#FFB800"
                 tools:text="Pending" />
 
@@ -70,6 +95,13 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_weight="1"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnViewSubmissions"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="View Submissions" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnUploadAnswer"
@@ -87,9 +119,6 @@
                 app:icon="@drawable/ic_checkmark_circle"
                 app:iconTint="@color/white"
                 app:backgroundTint="#4CAF50"/>
-
-            <ImageView android:id="@+id/ivEdit" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
-            <ImageView android:id="@+id/ivDelete" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
