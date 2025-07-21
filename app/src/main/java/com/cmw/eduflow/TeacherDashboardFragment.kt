@@ -87,7 +87,8 @@ class TeacherDashboardFragment : Fragment() {
         assignmentAdapter = AssignmentAdapter(
             userRole = "teacher",
             onEditClick = { assignment -> showCreateAssignmentDialog(assignment) },
-            onDeleteClick = { assignment -> showDeleteConfirmationDialog(assignment) }
+            onDeleteClick = { assignment -> showDeleteConfirmationDialog(assignment) },
+            onUploadClick = { /* Teachers don't upload answers, so this is empty */ }
         )
         binding.rvAssignments.adapter = assignmentAdapter
 

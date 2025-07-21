@@ -19,12 +19,13 @@ import java.util.concurrent.TimeUnit
 class AssignmentAdapter(
     private val userRole: String,
     private val onEditClick: (Assignment) -> Unit,
-    private val onDeleteClick: (Assignment) -> Unit
+    private val onDeleteClick: (Assignment) -> Unit,
+    private val onUploadClick: (Assignment) -> Unit
 ) : ListAdapter<Assignment, AssignmentAdapter.AssignmentViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AssignmentViewHolder {
         val binding = ItemAssignmentBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return AssignmentViewHolder(binding, onEditClick, onDeleteClick)
+        return AssignmentViewHolder(binding, onEditClick, onDeleteClick, onUploadClick)
     }
 
     override fun onBindViewHolder(holder: AssignmentViewHolder, position: Int) {
@@ -34,7 +35,8 @@ class AssignmentAdapter(
     class AssignmentViewHolder(
         private val binding: ItemAssignmentBinding,
         private val onEditClick: (Assignment) -> Unit,
-        private val onDeleteClick: (Assignment) -> Unit
+        private val onDeleteClick: (Assignment) -> Unit,
+        private val onUploadClick: (Assignment) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(assignment: Assignment, userRole: String) {
@@ -76,14 +78,17 @@ class AssignmentAdapter(
             if (userRole == "teacher") {
                 binding.ivEdit.visibility = View.VISIBLE
                 binding.ivDelete.visibility = View.VISIBLE
-            } else {
+                binding.btnUploadAnswer.visibility = View.GONE
+            } else { // Student
                 binding.ivEdit.visibility = View.GONE
                 binding.ivDelete.visibility = View.GONE
+                binding.btnUploadAnswer.visibility = View.VISIBLE
             }
 
             // Set click listeners
             binding.ivEdit.setOnClickListener { onEditClick(assignment) }
             binding.ivDelete.setOnClickListener { onDeleteClick(assignment) }
+            binding.btnUploadAnswer.setOnClickListener { onUploadClick(assignment) }
 
             binding.ivDownload.setOnClickListener {
                 if (assignment.fileUrl.isNotEmpty()) {

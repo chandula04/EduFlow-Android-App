@@ -36,9 +36,8 @@ class CourseMaterialAdapter(
             binding.tvMaterialTitle.text = material.lessonTitle
             binding.tvSubjectName.text = "Subject: ${material.subjectName}"
 
+            // This line was missing, re-added to prevent potential crashes
             val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-            // The line below was commented out in one version, make sure your data class has 'uploadedAt'
-            // If not, you can remove this line.
             // binding.tvUploadDate.text = sdf.format(material.uploadedAt.toDate())
 
             if (material.fileType == "video") {
@@ -51,7 +50,7 @@ class CourseMaterialAdapter(
             if (userRole == "teacher") {
                 binding.ivEdit.visibility = View.VISIBLE
                 binding.ivDelete.visibility = View.VISIBLE
-            } else {
+            } else { // "student"
                 binding.ivEdit.visibility = View.GONE
                 binding.ivDelete.visibility = View.GONE
             }
