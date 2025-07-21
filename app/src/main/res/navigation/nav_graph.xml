@@ -3,13 +3,103 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/HomeFragment">
+    app:startDestination="@id/homeFragment">
+
+    <action
+        android:id="@+id/action_global_profileFragment"
+        app:destination="@id/profileFragment" />
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.cmw.eduflow.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_adminDashboardFragment"
+            app:destination="@id/adminDashboardFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_homeFragment_to_teacherDashboardFragment"
+            app:destination="@id/teacherDashboardFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_homeFragment_to_studentDashboardFragment"
+            app:destination="@id/studentDashboardFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.cmw.eduflow.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_loginFragment_to_adminDashboardFragment"
+            app:destination="@id/adminDashboardFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_loginFragment_to_teacherDashboardFragment"
+            app:destination="@id/teacherDashboardFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_loginFragment_to_studentDashboardFragment"
+            app:destination="@id/studentDashboardFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_loginFragment_to_registerFragment"
+            app:destination="@id/registerFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_forgotPasswordFragment"
+            app:destination="@id/forgotPasswordFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.cmw.eduflow.RegisterFragment"
+        android:label="Register"
+        tools:layout="@layout/fragment_register">
+        <action
+            android:id="@+id/action_registerFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/forgotPasswordFragment"
+        android:name="com.cmw.eduflow.ForgotPasswordFragment"
+        android:label="fragment_forgot_password"
+        tools:layout="@layout/fragment_forgot_password" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.cmw.eduflow.ProfileFragment"
+        android:label="Edit Profile"
+        tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/adminDashboardFragment"
+        android:name="com.cmw.eduflow.AdminDashboardFragment"
+        android:label="Admin Dashboard"
+        tools:layout="@layout/fragment_admin_dashboard" />
 
     <fragment
         android:id="@+id/teacherDashboardFragment"
         android:name="com.cmw.eduflow.TeacherDashboardFragment"
         android:label="Teacher Dashboard"
         tools:layout="@layout/fragment_teacher_dashboard" >
+        <action
+            android:id="@+id/action_teacherDashboardFragment_to_subjectsFragment"
+            app:destination="@id/subjectsFragment" />
         <action
             android:id="@+id/action_teacherDashboardFragment_to_materialsListFragment"
             app:destination="@id/materialsListFragment" />
@@ -24,7 +114,20 @@
             android:id="@+id/action_studentDashboardFragment_to_assignmentsListFragment"
             app:destination="@id/assignmentsListFragment" />
         <action
+            android:id="@+id/action_studentDashboardFragment_to_subjectsFragment"
+            app:destination="@id/subjectsFragment" />
+        <action
             android:id="@+id/action_studentDashboardFragment_to_materialsListFragment"
+            app:destination="@id/materialsListFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/subjectsFragment"
+        android:name="com.cmw.eduflow.SubjectsFragment"
+        android:label="Subjects"
+        tools:layout="@layout/fragment_subjects">
+        <action
+            android:id="@+id/action_subjectsFragment_to_materialsListFragment"
             app:destination="@id/materialsListFragment" />
     </fragment>
 
@@ -40,5 +143,11 @@
             android:name="subjectName"
             app:argType="string" />
     </fragment>
+
+    <fragment
+        android:id="@+id/assignmentsListFragment"
+        android:name="com.cmw.eduflow.AssignmentsListFragment"
+        android:label="Assignments"
+        tools:layout="@layout/fragment_assignments_list" />
 
 </navigation>
