@@ -62,6 +62,7 @@ class LoginFragment : Fragment() {
         val email = binding.etEmail.text.toString().trim()
         val password = binding.etPassword.text.toString().trim()
 
+    // if the pasword and Email is Not Empty , Save the Creatianal Details
         if (email.isNotEmpty() && password.isNotEmpty()) {
             setLoading(true)
             if (binding.cbRememberMe.isChecked) {
@@ -70,6 +71,7 @@ class LoginFragment : Fragment() {
                 clearCredentials()
             }
 
+            //This use for Verify the email adress 
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {

@@ -78,6 +78,7 @@ class TeacherDashboardFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
+        //functions
         setupToolbar()
         setupRecyclerViews()
         fetchData()
@@ -142,6 +143,7 @@ class TeacherDashboardFragment : Fragment() {
 
         fetchAttendanceForDate(Calendar.getInstance())
     }
+//fech the attendance data
 
     private fun fetchAttendanceForDate(date: Calendar) {
         val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -161,8 +163,11 @@ class TeacherDashboardFragment : Fragment() {
             }
     }
 
+
+    //Mark attendance function
     private fun markAttendance(studentId: String) {
         setLoading(true)
+        //Get users from database
         db.collection("users").document(studentId).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
@@ -201,7 +206,7 @@ class TeacherDashboardFragment : Fragment() {
                 Toast.makeText(context, "Error fetching student details.", Toast.LENGTH_SHORT).show()
             }
     }
-
+//Delete attendance Function
     private fun showDeleteAttendanceDialog(record: AttendanceRecord) {
         AlertDialog.Builder(requireContext())
             .setTitle("Delete Attendance")
@@ -217,6 +222,7 @@ class TeacherDashboardFragment : Fragment() {
             .show()
     }
 
+    //Showing Assigment Function
     private fun showCreateAssignmentDialog(assignmentToEdit: Assignment? = null) {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_create_assignment, null)
         val etTitle = dialogView.findViewById<TextInputEditText>(R.id.etAssignmentTitle)
@@ -262,6 +268,7 @@ class TeacherDashboardFragment : Fragment() {
             .show()
     }
 
+    //This is cloud storage for save Images and  PDF
     private fun uploadPdfToCloudinaryAndSave(title: String, pdfUri: Uri, dueDate: Timestamp) {
         setLoading(true)
         MediaManager.get().upload(pdfUri)
@@ -304,6 +311,7 @@ class TeacherDashboardFragment : Fragment() {
             }
     }
 
+    // This Function Use For Showing Error messages
     private fun showDeleteConfirmationDialog(assignment: Assignment) {
         AlertDialog.Builder(requireContext())
             .setTitle("Delete Assignment")
