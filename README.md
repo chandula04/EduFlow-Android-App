@@ -50,11 +50,11 @@ EduFlow is packed with features tailored to the specific needs of each user role
 
 This project is built with a modern and scalable tech stack:
 
-* **Frontend:** [e.g., Flutter, React Native, Jetpack Compose]
-* **Backend:** [e.g., Node.js with Express, Python with Django, Firebase]
-* **Database:** [e.g., MongoDB, PostgreSQL, Firebase Firestore]
-* **Authentication:** [e.g., JWT (JSON Web Tokens), Firebase Authentication]
-* **Cloud Services:** [e.g., Firebase Cloud Messaging for notifications, AWS S3 for storage]
+* **Frontend:** [KOTLIN]
+* **Backend:** [java]
+* **Database:** [Firestore,Cloudinary]
+* **Authentication:** [Firebase Authentication]
+* **Cloud Services:** [e.g., Firebase Cloud Messaging for notifications, Cloudinary for Media]
 
 ---
 
@@ -65,8 +65,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 ### Prerequisites
 
 You will need the following tools installed on your system:
-* [e.g., Node.js, npm/yarn]
-* [e.g., Flutter SDK, Android Studio/VS Code]
+* [e.g.,  Android Studio]
 * [e.g., Git]
 
 ### Installation
