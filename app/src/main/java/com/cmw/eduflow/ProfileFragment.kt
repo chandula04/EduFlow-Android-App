@@ -202,7 +202,8 @@ class ProfileFragment : Fragment() {
     private fun uploadImageToCloudinaryAndSave() {
         // IMPORTANT: You must create an unsigned upload preset in your Cloudinary settings.
         MediaManager.get().upload(imageUri)
-            .unsigned("YOUR_UPLOAD_PRESET_NAME") // REPLACE WITH YOUR PRESET NAME
+            .option("resource_type", "image")
+            .option("upload_preset", "eduflow_unsigned")
             .callback(object : UploadCallback {
                 override fun onSuccess(requestId: String, resultData: Map<*, *>) {
                     val imageUrl = resultData["secure_url"].toString()

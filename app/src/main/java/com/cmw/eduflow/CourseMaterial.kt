@@ -8,6 +8,7 @@ data class CourseMaterial(
     val subjectName: String = "",
     val fileUrl: String = "",
     val fileType: String = "", // e.g., "pdf", "video", "image"
+    val subjectId: String = "",
     val uploadedAt: Timestamp = Timestamp.now(),
     val teacherId: String = ""
 )

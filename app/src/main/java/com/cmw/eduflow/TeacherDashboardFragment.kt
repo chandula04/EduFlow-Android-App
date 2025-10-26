@@ -273,7 +273,7 @@ class TeacherDashboardFragment : Fragment() {
         setLoading(true)
         MediaManager.get().upload(pdfUri)
             .option("resource_type", "auto")
-            .unsigned("eduflow_unsigned")
+            .option("upload_preset", "eduflow_unsigned")
             .callback(object : UploadCallback {
                 override fun onSuccess(requestId: String, resultData: Map<*, *>) {
                     val fileUrl = resultData["secure_url"].toString()
@@ -371,7 +371,8 @@ class TeacherDashboardFragment : Fragment() {
     private fun uploadMaterialToCloudinary(lessonTitle: String, subjectName: String, fileUri: Uri) {
         setLoading(true)
         MediaManager.get().upload(fileUri)
-            .unsigned("eduflow_unsigned")
+            .option("resource_type", "auto")
+            .option("upload_preset", "eduflow_unsigned")
             .callback(object: UploadCallback {
                 override fun onSuccess(requestId: String, resultData: Map<*, *>) {
                     val url = resultData["secure_url"].toString()

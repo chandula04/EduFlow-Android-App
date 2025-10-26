@@ -147,8 +147,9 @@ class AssignmentsListFragment : Fragment() {
     private fun uploadSubmissionToCloudinary() {
         if (selectedFileUri == null || lastClickedAssignmentId.isEmpty()) return
         setLoading(true)
-        MediaManager.get().upload(selectedFileUri)
-            .unsigned("eduflow_unsigned")
+        MediaManager.get().upload(selectedFileUri!!)
+            .option("resource_type", "auto")
+            .option("upload_preset", "eduflow_unsigned")
             .callback(object: UploadCallback {
                 override fun onSuccess(requestId: String, resultData: Map<*, *>) {
                     val url = resultData["secure_url"].toString()
@@ -167,8 +168,9 @@ class AssignmentsListFragment : Fragment() {
     private fun reuploadSubmissionToCloudinary() {
         if (selectedFileUri == null || lastClickedSubmission == null) return
         setLoading(true)
-        MediaManager.get().upload(selectedFileUri)
-            .unsigned("eduflow_unsigned")
+        MediaManager.get().upload(selectedFileUri!!)
+            .option("resource_type", "auto")
+            .option("upload_preset", "eduflow_unsigned")
             .callback(object: UploadCallback {
                 override fun onSuccess(requestId: String, resultData: Map<*, *>) {
                     val newUrl = resultData["secure_url"].toString()
