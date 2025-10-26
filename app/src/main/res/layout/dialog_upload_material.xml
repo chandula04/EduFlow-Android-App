@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -13,7 +12,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Lesson title">
+            android:hint="@string/lesson_title">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etLessonTitle"
                 android:layout_width="match_parent"
@@ -24,7 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:hint="Subject name">
+            android:hint="@string/subject_name">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etSubjectName"
                 android:layout_width="match_parent"
@@ -36,14 +35,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Select file"/>
+            android:text="@string/select_file"/>
 
         <TextView
             android:id="@+id/tvSelectedFile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="No file selected"
+            android:text="@string/no_file_selected"
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium"/>
 
     </LinearLayout>

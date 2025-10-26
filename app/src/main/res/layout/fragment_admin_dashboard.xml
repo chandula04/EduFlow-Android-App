@@ -2,7 +2,6 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
@@ -36,7 +35,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Account Management"
+                android:text="@string/user_management"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"/>
@@ -46,8 +45,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 app:cardCornerRadius="20dp"
-                app:cardBackgroundColor="#E8F5E9"
-                app:strokeColor="#81C784"
+                app:cardBackgroundColor="#FFF3E0"
+                app:strokeColor="#FFB74D"
                 app:strokeWidth="1dp">
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -55,12 +54,19 @@
                     android:orientation="vertical"
                     android:padding="24dp"
                     android:gravity="center">
+                    <ImageView
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:src="@drawable/ic_person"
+                        android:contentDescription="@string/icon"
+                        app:tint="#FF9800"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Manage student and teacher accounts."
+                        android:text="@string/manage_users_description"
                         android:textAlignment="center"
-                        android:textColor="#4CAF50"
+                        android:textColor="#F57C00"
+                        android:layout_marginTop="16dp"
                         android:layout_marginBottom="16dp"/>
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -72,19 +78,19 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Manage Students"
+                            android:text="@string/students"
                             android:layout_marginEnd="8dp"
                             app:icon="@drawable/ic_person"
-                            app:backgroundTint="#66BB6A"/>
+                            app:backgroundTint="#FF9800"/>
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnManageTeachers"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Manage Teachers"
+                            android:text="@string/teachers"
                             android:layout_marginStart="8dp"
                             app:icon="@drawable/ic_school"
-                            app:backgroundTint="#66BB6A"/>
+                            app:backgroundTint="#FF9800"/>
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -92,7 +98,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Assignment Management"
+                android:text="@string/quick_actions"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
@@ -103,21 +109,79 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                app:cardCornerRadius="16dp">
-                <TextView
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="horizontal"
                     android:padding="20dp"
-                    android:text="Assign Students to Teachers/Courses"
-                    android:drawableEnd="@drawable/abc_ic_go_search_api_material"
-                    android:textSize="16sp"
-                    android:textStyle="bold"/>
+                    android:gravity="center_vertical">
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_assignment"
+                        android:contentDescription="@string/icon"
+                        app:tint="#9C27B0"
+                        android:layout_marginEnd="16dp"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/assign_students_to_courses"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black"/>
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/abc_ic_go_search_api_material"
+                        android:contentDescription="@string/navigation_icon"
+                        app:tint="#757575"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardViewManageSubjects"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="20dp"
+                    android:gravity="center_vertical">
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_school"
+                        android:contentDescription="@string/icon"
+                        app:tint="#3F51B5"
+                        android:layout_marginEnd="16dp"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/manage_subjects_courses"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black"/>
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/abc_ic_go_search_api_material"
+                        android:contentDescription="@string/navigation_icon"
+                        app:tint="#757575"/>
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Reports"
+                android:text="@string/reports_analytics"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
@@ -128,29 +192,110 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                app:cardCornerRadius="16dp">
-                <TextView
-                    android:layout_width="match_parent"   android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
                     android:padding="20dp"
-                    android:text="View Attendance Reports"
-                    android:drawableEnd="@drawable/abc_ic_go_search_api_material"
-                    android:textSize="16sp"
-                    android:textStyle="bold"/>
+                    android:gravity="center_vertical">
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_calendar"
+                        android:contentDescription="@string/icon"
+                        app:tint="#4CAF50"
+                        android:layout_marginEnd="16dp"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/attendance_reports"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black"/>
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/abc_ic_go_search_api_material"
+                        android:contentDescription="@string/navigation_icon"
+                        app:tint="#757575"/>
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardViewResultsReports"
-                android:layout_width="match_parent"   android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                app:cardCornerRadius="16dp">
-                <TextView
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="horizontal"
                     android:padding="20dp"
-                    android:text="View Results Reports"
-                    android:drawableEnd="@drawable/abc_ic_go_search_api_material"
-                    android:textSize="16sp"
-                    android:textStyle="bold"/>
+                    android:gravity="center_vertical">
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_bar_chart"
+                        android:contentDescription="@string/icon"
+                        app:tint="#2196F3"
+                        android:layout_marginEnd="16dp"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/performance_reports"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black"/>
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/abc_ic_go_search_api_material"
+                        android:contentDescription="@string/navigation_icon"
+                        app:tint="#757575"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardViewSystemSettings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="20dp"
+                    android:gravity="center_vertical">
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_edit"
+                        android:contentDescription="@string/icon"
+                        app:tint="#607D8B"
+                        android:layout_marginEnd="16dp"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/system_settings"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black"/>
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/abc_ic_go_search_api_material"
+                        android:contentDescription="@string/navigation_icon"
+                        app:tint="#757575"/>
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>

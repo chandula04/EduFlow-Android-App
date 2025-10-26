@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.view.isVisible
+import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.cmw.eduflow.databinding.FragmentAdminDashboardBinding
@@ -45,7 +45,9 @@ class AdminDashboardFragment : Fragment() {
                 }
                 R.id.action_logout -> {
                     val prefs = requireActivity().getSharedPreferences("EduFlowPrefs", Context.MODE_PRIVATE)
-                    prefs.edit().putBoolean("isLoggedIn", false).apply()
+                    prefs.edit {
+                        putBoolean("isLoggedIn", false)
+                    }
                     auth.signOut()
                     findNavController().navigate(R.id.homeFragment)
                     true
@@ -57,23 +59,31 @@ class AdminDashboardFragment : Fragment() {
 
     private fun setupClickListeners() {
         binding.btnManageStudents.setOnClickListener {
-            Toast.makeText(context, "Manage Students clicked", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Student Management feature coming soon", Toast.LENGTH_SHORT).show()
         }
 
         binding.btnManageTeachers.setOnClickListener {
-            Toast.makeText(context, "Manage Teachers clicked", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Teacher Management feature coming soon", Toast.LENGTH_SHORT).show()
         }
 
         binding.cardViewAssignStudents.setOnClickListener {
-            Toast.makeText(context, "Assign Students clicked", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Assign Students feature coming soon", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.cardViewManageSubjects.setOnClickListener {
+            Toast.makeText(context, "Manage Subjects feature coming soon", Toast.LENGTH_SHORT).show()
         }
 
         binding.cardViewAttendanceReports.setOnClickListener {
-            Toast.makeText(context, "Attendance Reports clicked", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Attendance Reports feature coming soon", Toast.LENGTH_SHORT).show()
         }
 
         binding.cardViewResultsReports.setOnClickListener {
-            Toast.makeText(context, "Results Reports clicked", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Performance Reports feature coming soon", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.cardViewSystemSettings.setOnClickListener {
+            Toast.makeText(context, "System Settings feature coming soon", Toast.LENGTH_SHORT).show()
         }
     }
 

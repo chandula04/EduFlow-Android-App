@@ -2,4 +2,25 @@
     <string name="app_name">EduFlow</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Dialog Upload Material -->
+    <string name="lesson_title">Lesson title</string>
+    <string name="subject_name">Subject name</string>
+    <string name="select_file">Select file</string>
+    <string name="no_file_selected">No file selected</string>
+
+    <!-- Admin Dashboard -->
+    <string name="user_management">User Management</string>
+    <string name="manage_users_description">Manage student and teacher accounts, add new users, and update information.</string>
+    <string name="students">Students</string>
+    <string name="teachers">Teachers</string>
+    <string name="quick_actions">Quick Actions</string>
+    <string name="assign_students_to_courses">Assign Students to Courses</string>
+    <string name="manage_subjects_courses">Manage Subjects &amp; Courses</string>
+    <string name="reports_analytics">Reports &amp; Analytics</string>
+    <string name="attendance_reports">Attendance Reports</string>
+    <string name="performance_reports">Performance Reports</string>
+    <string name="system_settings">System Settings</string>
+    <string name="icon">Icon</string>
+    <string name="navigation_icon">Navigation</string>
 </resources>
