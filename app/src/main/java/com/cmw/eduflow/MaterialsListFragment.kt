@@ -2,14 +2,13 @@ package com.cmw.eduflow
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.cmw.eduflow.databinding.FragmentMaterialsListBinding
+import com.cmw.eduflow.databinding.DialogUploadMaterialBinding
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
@@ -33,7 +33,7 @@ class MaterialsListFragment : Fragment() {
     private var selectedFileUri: Uri? = null
     private var tvSelectedFileNameInDialog: TextView? = null
     private lateinit var materialAdapter: CourseMaterialAdapter
-    private var currentUserRole: String = "student" // Default to student
+    private var currentUserRole: String = "student"
 
     private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -55,14 +55,13 @@ class MaterialsListFragment : Fragment() {
         binding.toolbar.title = args.subjectName
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        // We will fetch the role first, then setup the adapter and FAB
         fetchCurrentUserRole()
     }
 
     private fun fetchCurrentUserRole() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         if (userId == null) {
-            setupUIForRole() // Setup with default "student" role if user is somehow null
+            setupUIForRole()
             return
         }
 
@@ -71,16 +70,14 @@ class MaterialsListFragment : Fragment() {
                 if (document.exists()) {
                     currentUserRole = document.getString("role") ?: "student"
                 }
-                // Now that we have the role, set up the UI
                 setupUIForRole()
             }
             .addOnFailureListener {
-                setupUIForRole() // Setup with default role on failure
+                setupUIForRole()
             }
     }
 
     private fun setupUIForRole() {
-        // Hide the "Add" button for students
         if (currentUserRole != "teacher") {
             binding.fabAddMaterial.visibility = View.GONE
         }
@@ -95,7 +92,6 @@ class MaterialsListFragment : Fragment() {
         )
         binding.rvMaterials.adapter = materialAdapter
 
-        // Fetch and display materials
         FirebaseFirestore.getInstance().collection("materials")
             .whereEqualTo("subjectId", args.subjectId)
             .orderBy("uploadedAt", Query.Direction.DESCENDING)
@@ -105,77 +101,91 @@ class MaterialsListFragment : Fragment() {
             }
     }
 
-    private fun showUploadMaterialDialog(materialToEdit: CourseMaterial?) {
+    private fun showUploadMaterialDialog(materialToEdit: CourseMaterial? = null) {
         val isEditing = materialToEdit != null
         selectedFileUri = null
 
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_upload_material, null)
-        val etLessonTitle = dialogView.findViewById<EditText>(R.id.etLessonTitle)
-        val btnSelectFile = dialogView.findViewById<Button>(R.id.btnSelectFile)
-        tvSelectedFileNameInDialog = dialogView.findViewById(R.id.tvSelectedFile)
+        val dialogBinding = DialogUploadMaterialBinding.inflate(LayoutInflater.from(requireContext()))
+        tvSelectedFileNameInDialog = dialogBinding.tvSelectedFile
 
         if (isEditing) {
-            etLessonTitle.setText(materialToEdit?.lessonTitle)
-            btnSelectFile.visibility = View.GONE
-            tvSelectedFileNameInDialog?.visibility = View.GONE
+            dialogBinding.etLessonTitle.setText(materialToEdit!!.lessonTitle)
+            dialogBinding.etSubjectName.setText(materialToEdit.subjectName)
+            dialogBinding.btnSelectFile.visibility = View.GONE
+        } else {
+            // Pre-fill subject name if creating a new one
+            dialogBinding.etSubjectName.setText(args.subjectName)
         }
 
-        btnSelectFile.setOnClickListener {
+        dialogBinding.btnSelectFile.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply { type = "*/*" }
             filePickerLauncher.launch(intent)
         }
 
-        AlertDialog.Builder(requireContext())
+        val builder = AlertDialog.Builder(requireContext())
             .setTitle(if (isEditing) "Edit Material Title" else "Upload New Material")
-            .setView(dialogView)
-            .setPositiveButton(if (isEditing) "Update" else "Upload") { _, _ ->
-                val title = etLessonTitle.text.toString().trim()
-                if (title.isNotEmpty()) {
-                    if (isEditing) {
-                        FirebaseFirestore.getInstance().collection("materials").document(materialToEdit!!.id)
-                            .update("lessonTitle", title)
-                            .addOnSuccessListener { Toast.makeText(context, "Material updated!", Toast.LENGTH_SHORT).show() }
-                    } else {
-                        if (selectedFileUri != null) {
-                            uploadFileToCloudinary(title, selectedFileUri!!)
-                        } else {
-                            Toast.makeText(context, "Please select a file.", Toast.LENGTH_SHORT).show()
-                        }
-                    }
+            .setView(dialogBinding.root)
+
+        builder.setPositiveButton(if (isEditing) "Update" else "Upload") { _: DialogInterface, _: Int ->
+            val title = dialogBinding.etLessonTitle.text?.toString()?.trim().orEmpty()
+            val subject = dialogBinding.etSubjectName.text?.toString()?.trim().orEmpty()
+            if (title.isNotEmpty() && subject.isNotEmpty()) {
+                if (isEditing) {
+                    FirebaseFirestore.getInstance().collection("materials").document(materialToEdit.id)
+                        .update(mapOf("lessonTitle" to title, "subjectName" to subject))
+                        .addOnSuccessListener { Toast.makeText(context, "Material updated!", Toast.LENGTH_SHORT).show() }
                 } else {
-                    Toast.makeText(context, "Please enter a title.", Toast.LENGTH_SHORT).show()
+                    if (selectedFileUri != null) {
+                        uploadFileToCloudinary(title, subject, selectedFileUri!!)
+                    } else {
+                        Toast.makeText(context, "Please select a file.", Toast.LENGTH_SHORT).show()
+                    }
                 }
+            } else {
+                Toast.makeText(context, "Please enter all details.", Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
+        builder.setNegativeButton("Cancel", null)
+        builder.show()
     }
 
-    private fun uploadFileToCloudinary(lessonTitle: String, fileUri: Uri) {
-        MediaManager.get().upload(fileUri)
-            .unsigned("eduflow_unsigned")
-            .callback(object: UploadCallback {
-                override fun onSuccess(requestId: String, resultData: Map<*, *>) {
-                    val url = resultData["secure_url"].toString()
-                    val fileType = resultData["resource_type"].toString()
-                    saveMaterialToFirestore(lessonTitle, url, fileType)
-                }
-                override fun onError(requestId: String, error: ErrorInfo) { /* Handle Error */ }
-                override fun onStart(requestId: String) { /* Handle Start */ }
-                override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) { /* Handle Progress */ }
-                override fun onReschedule(requestId: String, error: ErrorInfo) { /* Handle Reschedule */ }
-            }).dispatch()
+    private fun uploadFileToCloudinary(lessonTitle: String, subjectName: String, fileUri: Uri) {
+        try {
+            MediaManager.get().upload(fileUri)
+                .option("resource_type", "auto")
+                .option("upload_preset", "eduflow_unsigned")
+                .callback(object: UploadCallback {
+                    override fun onSuccess(requestId: String, resultData: Map<*, *>) {
+                        val url = resultData["secure_url"].toString()
+                        val fileType = resultData["resource_type"].toString()
+                        saveMaterialToFirestore(lessonTitle, subjectName, url, fileType)
+                    }
+                    override fun onError(requestId: String, error: ErrorInfo) {
+                        Toast.makeText(context, "Upload Error: ${error.description}", Toast.LENGTH_LONG).show()
+                    }
+                    override fun onStart(requestId: String) {}
+                    override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {}
+                    override fun onReschedule(requestId: String, error: ErrorInfo) {}
+                }).dispatch()
+        } catch (e: Exception) {
+            Toast.makeText(context, "Upload failed: ${e.message}", Toast.LENGTH_LONG).show()
+        }
     }
 
-    private fun saveMaterialToFirestore(lessonTitle: String, fileUrl: String, fileType: String) {
+    private fun saveMaterialToFirestore(lessonTitle: String, subjectName: String, fileUrl: String, fileType: String) {
         val db = FirebaseFirestore.getInstance()
         val materialId = db.collection("materials").document().id
+        val teacherId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
         val material = CourseMaterial(
             id = materialId,
             lessonTitle = lessonTitle,
+            subjectName = subjectName,
             fileUrl = fileUrl,
             fileType = if (fileType == "raw") "pdf" else fileType,
-            subjectName = args.subjectName,
-            uploadedAt = Timestamp.now()
+            subjectId = args.subjectId,
+            uploadedAt = Timestamp.now(),
+            teacherId = teacherId
         )
 
         db.collection("materials").document(materialId).set(material)
